@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import {
 		balance,
 		roundState,
@@ -10,13 +11,39 @@
 		GAME_MODES
 	} from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
-	import { TEXT } from '$lib/utils/socialMode';
+	import { TEXT, isSocialMode } from '$lib/utils/socialMode';
+
+	// Mobile detection for hiding when game active (only portrait mobile, not landscape)
+	let isMobilePortrait = false;
+	let isCompact = false;
+	onMount(() => {
+		const check = () => {
+			// Hide on portrait mobile (narrow + tall)
+			isMobilePortrait = window.innerWidth <= 1024 && window.innerHeight > 500;
+			// Compact mode for small landscape screens
+			isCompact = window.innerHeight <= 500;
+		};
+		check();
+		window.addEventListener('resize', check);
+		return () => window.removeEventListener('resize', check);
+	});
 
 	// Social text stores
 	const placeBetText = TEXT.placeBet;
 	const betAmountText = TEXT.betAmount;
 	const placeBetBtnText = TEXT.placeBetBtn;
 	const betPlacedText = TEXT.betPlaced;
+
+	// Currency display
+	function getCurrencySymbol(currency: string): string {
+		const symbols: Record<string, string> = {
+			USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥',
+			KRW: '₩', INR: '₹', BRL: 'R$', CAD: 'C$', AUD: 'A$'
+		};
+		return symbols[currency] || currency + ' ';
+	}
+
+	$: currencySymbol = $isSocialMode ? '' : getCurrencySymbol($rgsConfig.currency);
 
 	// Local input value
 	let betInput = '1.00';
@@ -77,9 +104,12 @@
 
 	// Get mode info for selected bullets
 	$: currentMode = GAME_MODES.find(m => m.bullets === selectedBullets);
+
+	// Hide on portrait mobile when game is active (inline style as workaround)
+	$: hideOnMobile = isMobilePortrait && gameState !== 'idle';
 </script>
 
-<div class="bet-controls" class:disabled={gameState !== 'idle'}>
+<div class="bet-controls" class:disabled={gameState !== 'idle'} class:compact={isCompact} style={hideOnMobile ? 'display: none !important;' : ''}>
 	<!-- Title/Instruction -->
 	{#if gameState === 'idle'}
 		<div class="panel-header">
@@ -97,7 +127,7 @@
 			{#if betLevels.length > 0}
 				<!-- Dropdown for bet levels from RGS -->
 				<div class="select-wrapper">
-					<span class="currency">$</span>
+					<span class="currency">{currencySymbol}</span>
 					<select
 						bind:value={currentBet}
 						on:change={(e) => selectBetLevel(parseFloat(e.currentTarget.value))}
@@ -113,7 +143,7 @@
 			{:else}
 				<!-- Manual input fallback -->
 				<div class="input-wrapper">
-					<span class="currency">$</span>
+					<span class="currency">{currencySymbol}</span>
 					<input
 						type="number"
 						bind:value={betInput}
@@ -130,7 +160,7 @@
 		</div>
 
 		<div class="balance-display">
-			Balance: <span class="balance-value">${$balance.toFixed(2)}</span>
+			Balance: <span class="balance-value">{currencySymbol}{$balance.toFixed(2)}</span>
 		</div>
 	</div>
 
@@ -161,7 +191,7 @@
 			</div>
 			<div class="info-row">
 				<span class="info-label">Potential Win:</span>
-				<span class="info-value win">${(currentBet * currentMode.multiplier).toFixed(2)}</span>
+				<span class="info-value win">{currencySymbol}{(currentBet * currentMode.multiplier).toFixed(2)}</span>
 			</div>
 		</div>
 	{/if}
@@ -469,5 +499,78 @@
 		.select-wrapper select {
 			font-size: 1rem;
 		}
+	}
+
+	/* Compact mode for landscape popouts */
+	.bet-controls.compact {
+		padding: 0.5rem;
+		gap: 0.35rem;
+		min-width: 180px;
+		max-width: 220px;
+		font-size: 0.75rem;
+	}
+
+	.compact .panel-header {
+		display: none;
+	}
+
+	.compact .section-label {
+		font-size: 0.55rem;
+		margin-bottom: 0.2rem;
+	}
+
+	.compact .bet-input-group {
+		gap: 0.25rem;
+	}
+
+	.compact .adjust-btn {
+		padding: 0.35rem 0.5rem;
+		font-size: 0.65rem;
+	}
+
+	.compact .select-wrapper,
+	.compact .input-wrapper {
+		padding: 0.35rem;
+	}
+
+	.compact .select-wrapper select,
+	.compact input[type="number"] {
+		font-size: 0.85rem;
+	}
+
+	.compact .balance-display {
+		font-size: 0.65rem;
+		margin-top: 0.25rem;
+	}
+
+	.compact .bullet-buttons {
+		gap: 0.2rem;
+	}
+
+	.compact .bullet-btn {
+		padding: 0.25rem 0.15rem;
+	}
+
+	.compact .bullet-count {
+		font-size: 0.8rem;
+	}
+
+	.compact .bullet-mult {
+		font-size: 0.5rem;
+	}
+
+	.compact .mode-info {
+		padding: 0.35rem;
+		gap: 0.2rem;
+	}
+
+	.compact .info-label,
+	.compact .info-value {
+		font-size: 0.65rem;
+	}
+
+	.compact .place-bet-btn {
+		padding: 0.5rem;
+		font-size: 0.75rem;
 	}
 </style>

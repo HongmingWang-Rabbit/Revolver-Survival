@@ -18,7 +18,7 @@
       "_context.js"
     ],
     "css": [
-      "_app/immutable/assets/StickMan.BLRghcwn.css"
+      "_app/immutable/assets/StickMan.Y_ShG_pW.css"
     ]
   },
   "_context.js": {
@@ -129,7 +129,7 @@
       "_socialMode.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.QwO6KcjO.css"
+      "_app/immutable/assets/_layout.LusGoeEU.css"
     ]
   },
   "src/routes/+page.svelte": {
@@ -144,7 +144,7 @@
       "_context.js"
     ],
     "css": [
-      "_app/immutable/assets/_page.DZYm1QaN.css"
+      "_app/immutable/assets/_page.dW1y7QRo.css"
     ]
   },
   "src/routes/[...path]/+page.svelte": {

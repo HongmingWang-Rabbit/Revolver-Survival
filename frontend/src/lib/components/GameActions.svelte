@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import {
 		roundState,
 		isSpinning,
@@ -7,14 +8,35 @@
 		continueBetting,
 		cashOut,
 		canSpin,
-		potentialWin
+		potentialWin,
+		rgsConfig
 	} from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
-	import { TEXT } from '$lib/utils/socialMode';
+	import { TEXT, isSocialMode } from '$lib/utils/socialMode';
+
+	// Compact mode for landscape popouts
+	let isCompact = false;
+	onMount(() => {
+		const check = () => { isCompact = window.innerHeight <= 500; };
+		check();
+		window.addEventListener('resize', check);
+		return () => window.removeEventListener('resize', check);
+	});
 
 	// Social text stores
 	const betAmountText = TEXT.betAmount;
 	const cashOutText = TEXT.cashOut;
+
+	// Currency display
+	function getCurrencySymbol(currency: string): string {
+		const symbols: Record<string, string> = {
+			USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥',
+			KRW: '₩', INR: '₹', BRL: 'R$', CAD: 'C$', AUD: 'A$'
+		};
+		return symbols[currency] || currency + ' ';
+	}
+
+	$: currencySymbol = $isSocialMode ? '' : getCurrencySymbol($rgsConfig.currency);
 
 	$: gameState = $roundState.gameState;
 	$: currentPot = $roundState.currentPot;
@@ -58,7 +80,7 @@
 	}
 </script>
 
-<div class="game-actions">
+<div class="game-actions" class:compact={isCompact}>
 	{#if gameState === 'idle'}
 		<!-- Empty state - message moved to BetControls -->
 	{:else if gameState === 'betting' || gameState === 'continue'}
@@ -66,7 +88,7 @@
 		<div class="action-group">
 			<div class="pot-display">
 				<span class="pot-label">{gameState === 'continue' ? 'POT AT RISK' : $betAmountText}</span>
-				<span class="pot-value">${currentPot.toFixed(2)}</span>
+				<span class="pot-value">{currencySymbol}{currentPot.toFixed(2)}</span>
 			</div>
 
 			<button
@@ -84,12 +106,12 @@
 			</button>
 
 			<div class="potential-win">
-				Win up to <span class="win-amount">${potential.toFixed(2)}</span>
+				Win up to <span class="win-amount">{currencySymbol}{potential.toFixed(2)}</span>
 			</div>
 
 			{#if gameState === 'continue'}
 				<button class="cashout-btn" on:click={handleCashOut}>
-					{$cashOutText} ${currentPot.toFixed(2)}
+					{$cashOutText} {currencySymbol}{currentPot.toFixed(2)}
 				</button>
 			{/if}
 		</div>
@@ -103,7 +125,7 @@
 			{#if survived}
 				<div class="win-display">
 					<span class="win-label">YOU SURVIVED!</span>
-					<span class="win-value">${currentPot.toFixed(2)}</span>
+					<span class="win-value">{currencySymbol}{currentPot.toFixed(2)}</span>
 				</div>
 				<div class="action-buttons">
 					<button class="continue-btn" on:click={handleContinue}>
@@ -116,7 +138,7 @@
 			{:else}
 				<div class="loss-display">
 					<span class="loss-label">GAME OVER</span>
-					<span class="loss-message">You lost ${currentPot.toFixed(2)}</span>
+					<span class="loss-message">You lost {currencySymbol}{currentPot.toFixed(2)}</span>
 				</div>
 			{/if}
 		</div>
@@ -342,5 +364,62 @@
 		.win-value {
 			font-size: 2rem;
 		}
+	}
+
+	/* Compact mode for landscape popouts */
+	.game-actions.compact {
+		padding: 0.5rem;
+		gap: 0.5rem;
+		min-width: 160px;
+		max-width: 200px;
+	}
+
+	.compact .action-group {
+		gap: 0.5rem;
+	}
+
+	.compact .pot-label {
+		font-size: 0.55rem;
+	}
+
+	.compact .pot-value {
+		font-size: 1.25rem;
+	}
+
+	.compact .spin-btn {
+		padding: 0.5rem 1rem;
+		font-size: 0.75rem;
+		border-radius: 8px;
+	}
+
+	.compact .potential-win {
+		font-size: 0.65rem;
+	}
+
+	.compact .cashout-btn,
+	.compact .continue-btn {
+		padding: 0.5rem;
+		font-size: 0.7rem;
+	}
+
+	.compact .win-label,
+	.compact .loss-label {
+		font-size: 1rem;
+	}
+
+	.compact .win-value {
+		font-size: 1.5rem;
+	}
+
+	.compact .loss-message {
+		font-size: 0.75rem;
+	}
+
+	.compact .result-actions {
+		gap: 0.75rem;
+	}
+
+	.compact .action-buttons {
+		gap: 0.5rem;
 	}
 </style>

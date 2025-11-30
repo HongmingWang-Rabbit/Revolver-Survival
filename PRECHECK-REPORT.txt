@@ -1,0 +1,326 @@
+================================================================================
+REVOLVER SURVIVAL - PRE-SUBMISSION CHECKLIST REPORT
+================================================================================
+Generated: 2024
+Status Legend: [PASS] = OK | [FAIL] = Needs Fix | [MANUAL] = Manual Check Required
+
+================================================================================
+1. PRE-CHECKS
+================================================================================
+
+[ ] Is the game title a valid title?
+    Status: [MANUAL] - "Revolver Survival" - needs manual verification
+
+[ ] Do other games have this title?
+    Status: [MANUAL] - Requires industry search
+
+[ ] Ensure they have uploaded game assets they wish to use in the tile
+    Status: [FAIL] - No Google Drive/Dropbox link provided in game-details.txt
+    ACTION REQUIRED: Add asset link to game-details.txt
+
+[ ] Is the game name unique across the industry?
+    Status: [MANUAL] - Requires industry search
+
+[ ] Are there stolen assets?
+    Status: [MANUAL] - All visual assets appear to be CSS-generated StickMan
+    No external images found in codebase
+
+[ ] Ensure IP / TM rights for game titles
+    Status: [MANUAL] - Requires legal verification
+
+[ ] Verify the studio if they have not released a game yet
+    Status: [MANUAL] - Requires verification
+
+[ ] Ensure name is available and does not exist anywhere
+    Status: [MANUAL] - Requires search
+
+[ ] Ensure they have IP/TM rights for provider name
+    Status: [MANUAL] - Requires legal verification
+
+[ ] Ensure game doesn't have copyrighted images
+    Status: [PASS] - No external images used, CSS-only graphics
+
+[ ] Ensure game assets and imagery do not contain offensive content
+    Status: [PASS] - Game is Russian Roulette themed but uses stick figures
+
+[ ] Cannot use trademarked terms such as Megaways, Xways
+    Status: [PASS] - No trademarked terms found in codebase
+
+================================================================================
+2. STAKE DESIGN REQUIREMENT
+================================================================================
+
+[ ] Game assets link (Google Drive/Dropbox)
+    Status: [FAIL] - Not provided
+    ACTION REQUIRED: Upload background image + foreground element
+
+================================================================================
+3. FRONTEND REQUIREMENTS
+================================================================================
+
+GAME LAYOUT
+-----------
+[x] Main game frame should not be scrollable
+    Status: [PASS] - body has "overflow: hidden" in app.css:27
+
+[ ] Child components scrollable only in one direction
+    Status: [PASS] - No scroll containers in components
+
+[ ] Network tab - no external font/resource errors
+    Status: [PASS] - No external imports found
+    Note: Uses system font "Courier New"
+
+GAME RULES
+----------
+[ ] Payout information per symbol clearly communicated
+    Status: [FAIL] - Game rules modal only shows disclaimer
+    ACTION REQUIRED: Add payout table to game rules
+
+[ ] Max multiplier displayed
+    Status: [PARTIAL] - Shows in mode selection (5.86x for 5 bullets)
+    ACTION REQUIRED: Add explicit max win to game rules
+
+[ ] Win combinations displayed in game-rules
+    Status: [FAIL] - Not in game rules modal
+    ACTION REQUIRED: Add mode descriptions to game rules
+
+[ ] Descriptions for each game mode
+    Status: [FAIL] - Not in game rules modal
+    ACTION REQUIRED: Add mode descriptions
+
+[ ] Cost of each game mode clearly displayed
+    Status: [PASS] - All modes cost 1x bet (implicitly shown)
+
+[ ] Free games conditions (if applicable)
+    Status: [N/A] - No free games feature
+
+AUTO PLAY
+---------
+[ ] Confirmation step before auto-play
+    Status: [N/A] - No auto-play feature implemented
+
+[ ] Confirmation for > 2x cost modes
+    Status: [N/A] - No bonus buy/auto-play feature
+
+SOUNDS / MUSIC
+--------------
+[ ] Option to disable sounds in UI
+    Status: [FAIL] - Sound toggle exists in code but NO UI BUTTON
+    ACTION REQUIRED: Add sound toggle button to UI
+
+LOADING ASSETS (CDN)
+--------------------
+[x] Images - load from CDN
+    Status: [PASS] - No external images (CSS-only graphics)
+
+[x] Fonts - load from CDN
+    Status: [PASS] - Uses system font only
+
+[x] Sounds - load from CDN
+    Status: [PASS] - Procedurally generated (no external files)
+
+[x] GIFs - load from CDN
+    Status: [N/A] - No GIFs used
+
+[x] Videos - load from CDN
+    Status: [N/A] - No videos used
+
+MOBILE VIEW SUPPORT
+-------------------
+[ ] Game UI usable on small screens
+    Status: [PASS] - Responsive CSS with mobile breakpoints
+
+[ ] Double tap to zoom disabled
+    Status: [FAIL] - viewport meta doesn't disable zoom
+    ACTION REQUIRED: Update app.html viewport meta tag
+
+[ ] User interaction guide in Info tab
+    Status: [FAIL] - Not implemented
+    ACTION REQUIRED: Add interaction guide to game rules
+
+[ ] Space bar bound to bet button
+    Status: [FAIL] - No keyboard bindings
+    ACTION REQUIRED: Add space bar to trigger spin/bet
+
+================================================================================
+4. MATH REQUIREMENTS
+================================================================================
+
+[x] Mode cost clearly displayed (for multiple modes)
+    Status: [PASS] - All modes cost 1x (standard)
+
+[ ] Maximum win clearly displayed
+    Status: [FAIL] - Not shown in game rules
+    ACTION REQUIRED: Display max win (5.86x with 5 bullets)
+
+[x] RTP 90% -> 98%
+    Status: [PASS] - RTP range: 97.33% - 97.67%
+
+[x] All modes within 0.5% RTP of each other
+    Status: [PASS] - Variation is 0.34%
+
+[ ] RTP clearly stated in game-rules
+    Status: [FAIL] - Not in game rules modal
+    ACTION REQUIRED: Add RTP to game rules
+
+[ ] Advertised max-win is achievable
+    Status: [PASS] - 5.86x achievable (16.67% chance with 5 bullets)
+
+[x] Reasonable > 0-win hit-rate
+    Status: [PASS] - 16.67% to 83.33% depending on mode
+
+[x] Broadly populated hit-rate table
+    Status: [PASS] - 5 distinct modes with different hit rates
+
+================================================================================
+5. RGS REQUIREMENTS
+================================================================================
+
+BET LEVELS
+----------
+[x] All bet-levels from RGS in use
+    Status: [PASS] - Uses betLevels from authenticate response
+
+[x] Min bet set by RGS
+    Status: [PASS] - Uses minBet from config
+
+[x] Max bet set by RGS
+    Status: [PASS] - Uses maxBet from config
+
+[x] Bet levels set by RGS
+    Status: [PASS] - Dropdown populated from RGS betLevels
+
+[x] Default bet level set by RGS
+    Status: [PASS] - Uses defaultBetLevel from config
+
+[x] Display bet levels up to max bet
+    Status: [PASS] - All levels displayed in dropdown
+
+[x] Balance taken from balance { amount } parameter
+    Status: [PASS] - fromRGSAmount(auth.balance.amount)
+
+RGS URL
+-------
+[x] Uses rgs_url query parameter
+    Status: [PASS] - rgs.ts:38 reads from URL params
+
+MULTIPLE LANGUAGE SUPPORT
+-------------------------
+[x] English supported
+    Status: [PASS] - Default language
+
+[ ] Different language params don't break display
+    Status: [MANUAL] - Requires testing with different lang params
+
+CURRENCY SUPPORT
+----------------
+[ ] Each currency works and displays correctly
+    Status: [PARTIAL] - Currency stored but hardcoded $ symbol
+    ACTION REQUIRED: Use currency from RGS config for display
+
+[ ] Currency abbreviation used if symbol unavailable
+    Status: [FAIL] - Only $ symbol used
+    ACTION REQUIRED: Implement dynamic currency display
+
+[x] General Terms/Disclaimer provided
+    Status: [PASS] - Disclaimer in GameDisclaimer.svelte
+
+REPLAY SUPPORT
+--------------
+[ ] Supports replay URLs
+    Status: [FAIL] - No replay functionality
+    ACTION REQUIRED: Implement replay support
+
+[ ] Supports optional params (currency, language, amount)
+    Status: [FAIL] - No replay functionality
+
+[ ] Allows replaying "event" at end of replay
+    Status: [FAIL] - No replay functionality
+
+[ ] UI displays bet cost clearly in replay
+    Status: [FAIL] - No replay functionality
+
+================================================================================
+6. JURISDICTION REQUIREMENTS - STAKE.US
+================================================================================
+
+[x] Social mode compliance translations
+    Status: [PASS] - socialMode.ts implements term replacements
+
+[x] Bet button doesn't say "bet"
+    Status: [PASS] - Shows "PLAY NOW" in social mode
+
+[ ] Game Info doesn't contain restricted words
+    Status: [PARTIAL] - Disclaimer still says "wins and plays"
+    Note: May need review of all text
+
+[x] Bet amount field not labeled "bet amount"
+    Status: [PASS] - Shows "PLAY AMOUNT" in social mode
+
+[ ] Auto bet feature labeling
+    Status: [N/A] - No auto-bet feature
+
+[ ] Bonus Buy label
+    Status: [N/A] - No bonus buy feature
+
+[ ] Insufficient funds error text
+    Status: [MANUAL] - Needs verification
+
+[ ] Supports SC and GC?
+    Status: [FAIL] - Not implemented
+    ACTION REQUIRED: Implement SC/GC currency support
+
+[ ] Display values without $ prefix
+    Status: [FAIL] - $ hardcoded throughout
+    ACTION REQUIRED: Remove $ for social mode
+
+================================================================================
+7. FINAL APPROVAL CHECKLIST
+================================================================================
+
+[ ] Star-rating applied
+    Status: [MANUAL] - Assigned by review team
+
+[ ] Bet-level templates applied (us_ prefix for Stake US)
+    Status: [MANUAL] - Configured in RGS
+
+[ ] Front and Math versions approved
+    Status: [PENDING]
+
+[ ] Requests set to 'Active'
+    Status: [PENDING]
+
+[ ] Google Drive link posted in approval channel
+    Status: [FAIL] - Link not provided
+
+================================================================================
+SUMMARY - ACTION ITEMS
+================================================================================
+
+CRITICAL (Must Fix):
+1. Add Google Drive/Dropbox link with game assets (background + foreground)
+2. Add sound toggle button to UI
+3. Implement replay support
+4. Add currency symbol handling (not just $)
+5. Disable double-tap zoom on mobile
+
+HIGH PRIORITY:
+6. Expand Game Rules modal to include:
+   - RTP information (97.33% - 97.67%)
+   - Max win information (5.86x)
+   - Mode descriptions and payouts
+   - User interaction guide
+7. Add space bar keyboard binding for spin
+8. Implement SC/GC support for Stake.US
+
+MEDIUM PRIORITY:
+9. Remove $ prefix in social mode
+10. Test with different language/currency params
+
+MANUAL VERIFICATION REQUIRED:
+- Game title uniqueness search
+- IP/TM rights verification
+- Studio verification
+- Test wins match game rules (10 spins per mode)
+
+================================================================================

@@ -148,8 +148,9 @@ export {
   roundState as a,
   balance as b,
   canPlaceBet as c,
-  canSpin as d,
-  isSpinning as i,
+  isSpinning as d,
+  canSpin as e,
+  isSocialMode as i,
   potentialWin as p,
   rgsConfig as r,
   showResult as s

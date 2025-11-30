@@ -862,6 +862,10 @@ function attr_class(value, hash, directives) {
   var result = to_class(value, hash, directives);
   return result ? ` class="${escape_html(result, true)}"` : "";
 }
+function attr_style(value, directives) {
+  var result = to_style(value, directives);
+  return result ? ` style="${escape_html(result, true)}"` : "";
+}
 function store_get(store_values, store_name, store) {
   if (store_name in store_values && store_values[store_name][0] === store) {
     return store_values[store_name][2];
@@ -889,8 +893,9 @@ function ensure_array_like(array_like_or_iterator) {
 }
 export {
   attr_class as a,
-  attr as b,
-  stringify as c,
+  attr_style as b,
+  attr as c,
+  stringify as d,
   ensure_array_like as e,
   head as h,
   is_passive_event as i,

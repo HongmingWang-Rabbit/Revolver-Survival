@@ -1,5 +1,5 @@
-import { s as store_get, a as attr_class, e as ensure_array_like, b as attr, u as unsubscribe_stores, c as stringify } from "./index2.js";
-import { G as GAME_MODES, a as roundState, c as canPlaceBet, r as rgsConfig, T as TEXT, b as balance, i as isSpinning, s as showResult, d as canSpin, p as potentialWin } from "./socialMode.js";
+import { s as store_get, a as attr_class, b as attr_style, e as ensure_array_like, c as attr, u as unsubscribe_stores, d as stringify } from "./index2.js";
+import { G as GAME_MODES, i as isSocialMode, r as rgsConfig, a as roundState, c as canPlaceBet, T as TEXT, b as balance, d as isSpinning, s as showResult, e as canSpin, p as potentialWin } from "./socialMode.js";
 import { X as escape_html } from "./context.js";
 class SoundManager {
   audioContext = null;
@@ -108,11 +108,28 @@ const SFX = new SoundManager();
 function BetControls($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
     var $$store_subs;
-    let currentBet, selectedBullets, gameState, canBet, minBet, maxBet, betLevels, currentMode;
+    let currencySymbol, currentBet, selectedBullets, gameState, canBet, minBet, maxBet, betLevels, currentMode, hideOnMobile;
+    let isMobilePortrait = false;
+    let isCompact = false;
     const placeBetText = TEXT.placeBet;
     const betAmountText = TEXT.betAmount;
     const placeBetBtnText = TEXT.placeBetBtn;
     const betPlacedText = TEXT.betPlaced;
+    function getCurrencySymbol(currency) {
+      const symbols = {
+        USD: "$",
+        EUR: "€",
+        GBP: "£",
+        JPY: "¥",
+        CNY: "¥",
+        KRW: "₩",
+        INR: "₹",
+        BRL: "R$",
+        CAD: "C$",
+        AUD: "A$"
+      };
+      return symbols[currency] || currency + " ";
+    }
     let betInput = "1.00";
     function formatBetAmount(amount) {
       if (amount >= 1e3) {
@@ -123,6 +140,7 @@ function BetControls($$renderer, $$props) {
       }
       return amount.toFixed(2);
     }
+    currencySymbol = store_get($$store_subs ??= {}, "$isSocialMode", isSocialMode) ? "" : getCurrencySymbol(store_get($$store_subs ??= {}, "$rgsConfig", rgsConfig).currency);
     currentBet = store_get($$store_subs ??= {}, "$roundState", roundState).betAmount;
     selectedBullets = store_get($$store_subs ??= {}, "$roundState", roundState).selectedBullets;
     gameState = store_get($$store_subs ??= {}, "$roundState", roundState).gameState;
@@ -133,7 +151,8 @@ function BetControls($$renderer, $$props) {
     betLevels = store_get($$store_subs ??= {}, "$rgsConfig", rgsConfig).betLevels;
     betInput = currentBet.toFixed(2);
     currentMode = GAME_MODES.find((m) => m.bullets === selectedBullets);
-    $$renderer2.push(`<div${attr_class("bet-controls svelte-1lv3ktd", void 0, { "disabled": gameState !== "idle" })}>`);
+    hideOnMobile = isMobilePortrait;
+    $$renderer2.push(`<div${attr_class("bet-controls svelte-1lv3ktd", void 0, { "disabled": gameState !== "idle", "compact": isCompact })}${attr_style(hideOnMobile ? "display: none !important;" : "")}>`);
     if (gameState === "idle") {
       $$renderer2.push("<!--[-->");
       $$renderer2.push(`<div class="panel-header svelte-1lv3ktd"><span class="panel-title svelte-1lv3ktd">${escape_html(store_get($$store_subs ??= {}, "$placeBetText", placeBetText))}</span> <span class="panel-subtitle svelte-1lv3ktd">Load the chamber and pull the trigger</span></div>`);
@@ -143,7 +162,7 @@ function BetControls($$renderer, $$props) {
     $$renderer2.push(`<!--]--> <div class="bet-section"><span class="section-label svelte-1lv3ktd">${escape_html(store_get($$store_subs ??= {}, "$betAmountText", betAmountText))}</span> <div class="bet-input-group svelte-1lv3ktd"><button class="adjust-btn svelte-1lv3ktd">1/2</button> `);
     if (betLevels.length > 0) {
       $$renderer2.push("<!--[-->");
-      $$renderer2.push(`<div class="select-wrapper svelte-1lv3ktd"><span class="currency svelte-1lv3ktd">$</span> `);
+      $$renderer2.push(`<div class="select-wrapper svelte-1lv3ktd"><span class="currency svelte-1lv3ktd">${escape_html(currencySymbol)}</span> `);
       $$renderer2.select(
         { value: currentBet, disabled: gameState !== "idle", class: "" },
         ($$renderer3) => {
@@ -166,9 +185,9 @@ function BetControls($$renderer, $$props) {
       $$renderer2.push(`</div>`);
     } else {
       $$renderer2.push("<!--[!-->");
-      $$renderer2.push(`<div class="input-wrapper svelte-1lv3ktd"><span class="currency svelte-1lv3ktd">$</span> <input type="number"${attr("value", betInput)}${attr("min", minBet)}${attr("max", maxBet)} step="0.01"${attr("disabled", gameState !== "idle", true)} class="svelte-1lv3ktd"/></div>`);
+      $$renderer2.push(`<div class="input-wrapper svelte-1lv3ktd"><span class="currency svelte-1lv3ktd">${escape_html(currencySymbol)}</span> <input type="number"${attr("value", betInput)}${attr("min", minBet)}${attr("max", maxBet)} step="0.01"${attr("disabled", gameState !== "idle", true)} class="svelte-1lv3ktd"/></div>`);
     }
-    $$renderer2.push(`<!--]--> <button class="adjust-btn svelte-1lv3ktd">2x</button></div> <div class="balance-display svelte-1lv3ktd">Balance: <span class="balance-value svelte-1lv3ktd">$${escape_html(store_get($$store_subs ??= {}, "$balance", balance).toFixed(2))}</span></div></div> <div class="bullet-section"><span class="section-label svelte-1lv3ktd">BULLETS</span> <div class="bullet-buttons svelte-1lv3ktd"><!--[-->`);
+    $$renderer2.push(`<!--]--> <button class="adjust-btn svelte-1lv3ktd">2x</button></div> <div class="balance-display svelte-1lv3ktd">Balance: <span class="balance-value svelte-1lv3ktd">${escape_html(currencySymbol)}${escape_html(store_get($$store_subs ??= {}, "$balance", balance).toFixed(2))}</span></div></div> <div class="bullet-section"><span class="section-label svelte-1lv3ktd">BULLETS</span> <div class="bullet-buttons svelte-1lv3ktd"><!--[-->`);
     const each_array_1 = ensure_array_like(GAME_MODES);
     for (let $$index_1 = 0, $$length = each_array_1.length; $$index_1 < $$length; $$index_1++) {
       let mode = each_array_1[$$index_1];
@@ -177,7 +196,7 @@ function BetControls($$renderer, $$props) {
     $$renderer2.push(`<!--]--></div></div> `);
     if (currentMode) {
       $$renderer2.push("<!--[-->");
-      $$renderer2.push(`<div class="mode-info svelte-1lv3ktd"><div class="info-row svelte-1lv3ktd"><span class="info-label svelte-1lv3ktd">Survival Rate:</span> <span class="info-value survival svelte-1lv3ktd">${escape_html((currentMode.survivalRate * 100).toFixed(1))}%</span></div> <div class="info-row svelte-1lv3ktd"><span class="info-label svelte-1lv3ktd">Potential Win:</span> <span class="info-value win svelte-1lv3ktd">$${escape_html((currentBet * currentMode.multiplier).toFixed(2))}</span></div></div>`);
+      $$renderer2.push(`<div class="mode-info svelte-1lv3ktd"><div class="info-row svelte-1lv3ktd"><span class="info-label svelte-1lv3ktd">Survival Rate:</span> <span class="info-value survival svelte-1lv3ktd">${escape_html((currentMode.survivalRate * 100).toFixed(1))}%</span></div> <div class="info-row svelte-1lv3ktd"><span class="info-label svelte-1lv3ktd">Potential Win:</span> <span class="info-value win svelte-1lv3ktd">${escape_html(currencySymbol)}${escape_html((currentBet * currentMode.multiplier).toFixed(2))}</span></div></div>`);
     } else {
       $$renderer2.push("<!--[!-->");
     }
@@ -196,10 +215,27 @@ function BetControls($$renderer, $$props) {
 function GameActions($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
     var $$store_subs;
-    let gameState, currentPot, spinning, result, showingResult, potential, survived;
+    let currencySymbol, gameState, currentPot, spinning, result, showingResult, potential, survived;
+    let isCompact = false;
     const betAmountText = TEXT.betAmount;
     const cashOutText = TEXT.cashOut;
+    function getCurrencySymbol(currency) {
+      const symbols = {
+        USD: "$",
+        EUR: "€",
+        GBP: "£",
+        JPY: "¥",
+        CNY: "¥",
+        KRW: "₩",
+        INR: "₹",
+        BRL: "R$",
+        CAD: "C$",
+        AUD: "A$"
+      };
+      return symbols[currency] || currency + " ";
+    }
     let lastPlayedResultId = null;
+    currencySymbol = store_get($$store_subs ??= {}, "$isSocialMode", isSocialMode) ? "" : getCurrencySymbol(store_get($$store_subs ??= {}, "$rgsConfig", rgsConfig).currency);
     gameState = store_get($$store_subs ??= {}, "$roundState", roundState).gameState;
     currentPot = store_get($$store_subs ??= {}, "$roundState", roundState).currentPot;
     spinning = store_get($$store_subs ??= {}, "$isSpinning", isSpinning);
@@ -217,17 +253,19 @@ function GameActions($$renderer, $$props) {
         SFX.play("bang");
       }
     }
-    $$renderer2.push(`<div class="game-actions svelte-11hl62d">`);
-    if (
-      // Call RGS to end round and update balance
-      gameState === "idle"
-    ) {
+    $$renderer2.push(`<div${attr_class("game-actions svelte-11hl62d", void 0, {
+      "compact": (
+        // Call RGS to end round and update balance
+        isCompact
+      )
+    })}>`);
+    if (gameState === "idle") {
       $$renderer2.push("<!--[-->");
     } else {
       $$renderer2.push("<!--[!-->");
       if (gameState === "betting" || gameState === "continue") {
         $$renderer2.push("<!--[-->");
-        $$renderer2.push(`<div class="action-group svelte-11hl62d"><div class="pot-display svelte-11hl62d"><span class="pot-label svelte-11hl62d">${escape_html(gameState === "continue" ? "POT AT RISK" : store_get($$store_subs ??= {}, "$betAmountText", betAmountText))}</span> <span class="pot-value svelte-11hl62d">$${escape_html(currentPot.toFixed(2))}</span></div> <button${attr_class("spin-btn svelte-11hl62d", void 0, { "spinning": spinning })}${attr("disabled", spinning, true)}>`);
+        $$renderer2.push(`<div class="action-group svelte-11hl62d"><div class="pot-display svelte-11hl62d"><span class="pot-label svelte-11hl62d">${escape_html(gameState === "continue" ? "POT AT RISK" : store_get($$store_subs ??= {}, "$betAmountText", betAmountText))}</span> <span class="pot-value svelte-11hl62d">${escape_html(currencySymbol)}${escape_html(currentPot.toFixed(2))}</span></div> <button${attr_class("spin-btn svelte-11hl62d", void 0, { "spinning": spinning })}${attr("disabled", spinning, true)}>`);
         if (spinning) {
           $$renderer2.push("<!--[-->");
           $$renderer2.push(`<span class="spinner svelte-11hl62d"></span> SPINNING...`);
@@ -235,10 +273,10 @@ function GameActions($$renderer, $$props) {
           $$renderer2.push("<!--[!-->");
           $$renderer2.push(`PULL TRIGGER`);
         }
-        $$renderer2.push(`<!--]--></button> <div class="potential-win svelte-11hl62d">Win up to <span class="win-amount svelte-11hl62d">$${escape_html(potential.toFixed(2))}</span></div> `);
+        $$renderer2.push(`<!--]--></button> <div class="potential-win svelte-11hl62d">Win up to <span class="win-amount svelte-11hl62d">${escape_html(currencySymbol)}${escape_html(potential.toFixed(2))}</span></div> `);
         if (gameState === "continue") {
           $$renderer2.push("<!--[-->");
-          $$renderer2.push(`<button class="cashout-btn svelte-11hl62d">${escape_html(store_get($$store_subs ??= {}, "$cashOutText", cashOutText))} $${escape_html(currentPot.toFixed(2))}</button>`);
+          $$renderer2.push(`<button class="cashout-btn svelte-11hl62d">${escape_html(store_get($$store_subs ??= {}, "$cashOutText", cashOutText))} ${escape_html(currencySymbol)}${escape_html(currentPot.toFixed(2))}</button>`);
         } else {
           $$renderer2.push("<!--[!-->");
         }
@@ -255,10 +293,10 @@ function GameActions($$renderer, $$props) {
             $$renderer2.push(`<div class="result-actions animate-fade-in svelte-11hl62d">`);
             if (survived) {
               $$renderer2.push("<!--[-->");
-              $$renderer2.push(`<div class="win-display svelte-11hl62d"><span class="win-label svelte-11hl62d">YOU SURVIVED!</span> <span class="win-value svelte-11hl62d">$${escape_html(currentPot.toFixed(2))}</span></div> <div class="action-buttons"><button class="continue-btn svelte-11hl62d">DOUBLE OR NOTHING</button> <button class="cashout-btn svelte-11hl62d">${escape_html(store_get($$store_subs ??= {}, "$cashOutText", cashOutText))}</button></div>`);
+              $$renderer2.push(`<div class="win-display svelte-11hl62d"><span class="win-label svelte-11hl62d">YOU SURVIVED!</span> <span class="win-value svelte-11hl62d">${escape_html(currencySymbol)}${escape_html(currentPot.toFixed(2))}</span></div> <div class="action-buttons svelte-11hl62d"><button class="continue-btn svelte-11hl62d">DOUBLE OR NOTHING</button> <button class="cashout-btn svelte-11hl62d">${escape_html(store_get($$store_subs ??= {}, "$cashOutText", cashOutText))}</button></div>`);
             } else {
               $$renderer2.push("<!--[!-->");
-              $$renderer2.push(`<div class="loss-display svelte-11hl62d"><span class="loss-label svelte-11hl62d">GAME OVER</span> <span class="loss-message svelte-11hl62d">You lost $${escape_html(currentPot.toFixed(2))}</span></div>`);
+              $$renderer2.push(`<div class="loss-display svelte-11hl62d"><span class="loss-label svelte-11hl62d">GAME OVER</span> <span class="loss-message svelte-11hl62d">You lost ${escape_html(currencySymbol)}${escape_html(currentPot.toFixed(2))}</span></div>`);
             }
             $$renderer2.push(`<!--]--></div>`);
           } else {
@@ -274,17 +312,42 @@ function GameActions($$renderer, $$props) {
     if ($$store_subs) unsubscribe_stores($$store_subs);
   });
 }
-function GameDisclaimer($$renderer) {
-  $$renderer.push(`<div class="disclaimer-container svelte-g8ieu7"><button class="info-btn svelte-g8ieu7" aria-label="Game Rules"><span class="info-icon svelte-g8ieu7">i</span></button> `);
-  {
-    $$renderer.push("<!--[!-->");
-  }
-  $$renderer.push(`<!--]--></div>`);
+function GameDisclaimer($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    $$renderer2.push(`<div class="disclaimer-container svelte-g8ieu7"><button class="info-btn svelte-g8ieu7" aria-label="Game Rules"><span class="info-icon svelte-g8ieu7">i</span></button> `);
+    {
+      $$renderer2.push("<!--[!-->");
+    }
+    $$renderer2.push(`<!--]--></div>`);
+  });
 }
 function Header($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
     var $$store_subs;
-    $$renderer2.push(`<header class="header svelte-1elxaub"><div class="balance-chip svelte-1elxaub"><span class="balance-label svelte-1elxaub">BALANCE</span> <span class="balance-amount svelte-1elxaub">$${escape_html(store_get($$store_subs ??= {}, "$balance", balance).toFixed(2))}</span></div></header>`);
+    let currency, currencySymbol;
+    function getCurrencyDisplay(currency2) {
+      const symbols = {
+        USD: "$",
+        EUR: "€",
+        GBP: "£",
+        JPY: "¥",
+        CNY: "¥",
+        KRW: "₩",
+        INR: "₹",
+        BRL: "R$",
+        CAD: "C$",
+        AUD: "A$"
+      };
+      return symbols[currency2] || currency2 + " ";
+    }
+    currency = store_get($$store_subs ??= {}, "$rgsConfig", rgsConfig).currency;
+    currencySymbol = store_get($$store_subs ??= {}, "$isSocialMode", isSocialMode) ? "" : getCurrencyDisplay(currency);
+    $$renderer2.push(`<header class="header svelte-1elxaub"><button class="sound-btn svelte-1elxaub" aria-label="Toggle Sound">`);
+    {
+      $$renderer2.push("<!--[-->");
+      $$renderer2.push(`<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" class="svelte-1elxaub"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>`);
+    }
+    $$renderer2.push(`<!--]--></button> <div class="balance-chip svelte-1elxaub"><span class="balance-label svelte-1elxaub">BALANCE</span> <span class="balance-amount svelte-1elxaub">${escape_html(currencySymbol)}${escape_html(store_get($$store_subs ??= {}, "$balance", balance).toFixed(2))}</span></div></header>`);
     if ($$store_subs) unsubscribe_stores($$store_subs);
   });
 }

@@ -25,6 +25,8 @@ html, body {
 	color: var(--color-text);
 	font-family: var(--font-mono);
 	overflow: hidden;
+	touch-action: manipulation; /* Disable double-tap zoom */
+	-webkit-tap-highlight-color: transparent;
 }
 
 button {
@@ -97,4 +99,28 @@ input {
 
 .animate-slide-up {
 	animation: slideUp 0.3s ease-out;
+}
+
+/* Global mobile utility - hide on mobile screens */
+@media (max-width: 1024px) {
+	[data-hide-mobile="true"] {
+		display: none !important;
+	}
+}
+
+/* Global landscape layout fix for popouts */
+@media (max-height: 500px) {
+	.game-layout {
+		flex-direction: row !important;
+		gap: 1rem !important;
+	}
+
+	.game-main {
+		padding: 0.5rem !important;
+	}
+
+	.left-panel, .right-panel {
+		width: auto !important;
+		max-width: none !important;
+	}
 }

@@ -3,22 +3,34 @@
 	import { onMount } from 'svelte';
 	import { initializeRGS, rgsConfig } from '$lib/stores/gameStore';
 	import { initSocialMode } from '$lib/utils/socialMode';
+	import { initReplayMode, isReplayMode, replayConfig } from '$lib/utils/replay';
 
 	let mounted = false;
 
 	onMount(async () => {
 		initSocialMode();
-		await initializeRGS();
+		const isReplay = initReplayMode();
+
+		if (!isReplay) {
+			await initializeRGS();
+		}
 		mounted = true;
 	});
 </script>
 
-{#if !mounted || $rgsConfig.loading}
+{#if !mounted || ($rgsConfig.loading && !$isReplayMode)}
 	<div class="loading-screen">
 		<div class="loading-content">
 			<div class="spinner"></div>
 			<p>Loading game...</p>
 		</div>
+	</div>
+{:else if $isReplayMode}
+	<slot />
+	<div class="replay-banner">
+		<span class="replay-icon">▶</span>
+		<span class="replay-text">REPLAY MODE</span>
+		<span class="replay-info">Round: {$replayConfig.roundId} | Amount: {$replayConfig.currency} {$replayConfig.amount.toFixed(2)}</span>
 	</div>
 {:else if !$rgsConfig.initialized && $rgsConfig.error}
 	<div class="error-screen">
@@ -33,7 +45,7 @@
 	<slot />
 {/if}
 
-{#if $rgsConfig.isDemo && mounted}
+{#if $rgsConfig.isDemo && mounted && !$isReplayMode}
 	<div class="demo-badge">DEMO</div>
 {/if}
 
@@ -91,5 +103,43 @@
 		font-weight: bold;
 		border-radius: 4px;
 		z-index: 100;
+	}
+
+	.replay-banner {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		padding: 0.5rem 1rem;
+		background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+		border-bottom: 2px solid var(--color-accent);
+		z-index: 200;
+	}
+
+	.replay-icon {
+		color: var(--color-accent);
+		font-size: 1rem;
+		animation: pulse 1.5s ease-in-out infinite;
+	}
+
+	.replay-text {
+		color: var(--color-accent);
+		font-weight: bold;
+		font-size: 0.875rem;
+		letter-spacing: 0.15em;
+	}
+
+	.replay-info {
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.5; }
 	}
 </style>

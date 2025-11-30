@@ -1,10 +1,28 @@
 <script lang="ts">
 	import { Header, BetControls, GameActions, StickMan, GameDisclaimer } from '$lib';
-	import { roundState, GAME_MODES } from '$lib/stores/gameStore';
+	import { roundState, GAME_MODES, placeBet, spin, canPlaceBet, canSpin, isSpinning } from '$lib/stores/gameStore';
+	import { SFX } from '$lib/utils/sounds';
 
 	$: selectedMode = GAME_MODES.find(m => m.bullets === $roundState.selectedBullets);
 	$: gameState = $roundState.gameState;
+
+	// Space bar keyboard binding
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.code === 'Space' && !event.repeat) {
+			event.preventDefault();
+
+			if ($roundState.gameState === 'idle' && $canPlaceBet) {
+				placeBet();
+				SFX.play('bet');
+			} else if (($roundState.gameState === 'betting' || $roundState.gameState === 'continue') && $canSpin && !$isSpinning) {
+				SFX.play('spin');
+				spin();
+			}
+		}
+	}
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <svelte:head>
 	<title>Revolver Survival | High Stakes Survival Game</title>
@@ -129,10 +147,11 @@
 		}
 	}
 
-	@media (max-width: 1024px) {
+	/* Portrait mobile and tablet - vertical stack */
+	@media (max-width: 1024px) and (min-height: 500px) {
 		.game-layout {
 			flex-direction: column;
-			gap: 1.5rem;
+			gap: 1rem;
 		}
 
 		.left-panel, .right-panel {
@@ -145,7 +164,70 @@
 		}
 	}
 
-	@media (max-width: 768px) {
+	/* Landscape popout/small screens - keep horizontal, compact */
+	@media (max-height: 500px) {
+		.game-main {
+			padding: 0.5rem !important;
+		}
+
+		.game-layout {
+			flex-direction: row !important;
+			gap: 1rem !important;
+			align-items: center !important;
+		}
+
+		.left-panel, .right-panel {
+			width: auto !important;
+			max-width: none !important;
+		}
+
+		.game-scene {
+			min-height: auto !important;
+			height: calc(100vh - 100px);
+			max-height: 280px;
+			padding: 0.5rem;
+		}
+
+		.center-panel {
+			gap: 0.5rem;
+		}
+
+		.mode-badge {
+			padding: 0.25rem 0.75rem;
+		}
+
+		.mode-bullets {
+			font-size: 0.875rem;
+		}
+
+		.mode-odds {
+			font-size: 0.625rem;
+		}
+	}
+
+	/* Very small landscape - Popout S (400x225) */
+	@media (max-height: 300px) {
+		.game-main {
+			padding: 0.25rem;
+		}
+
+		.game-layout {
+			gap: 0.5rem;
+		}
+
+		.game-scene {
+			height: calc(100vh - 60px);
+			max-height: 160px;
+			padding: 0.25rem;
+			border-radius: 8px;
+		}
+
+		.mode-badge {
+			display: none;
+		}
+	}
+
+	@media (max-width: 768px) and (min-height: 500px) {
 		.game-scene {
 			padding: 1.5rem;
 			min-height: 280px;
@@ -165,7 +247,7 @@
 		}
 	}
 
-	@media (max-width: 480px) {
+	@media (max-width: 480px) and (min-height: 500px) {
 		.game-main {
 			padding: 0.5rem;
 		}
@@ -181,7 +263,7 @@
 		}
 	}
 
-	@media (max-width: 360px) {
+	@media (max-width: 360px) and (min-height: 500px) {
 		.game-scene {
 			min-height: 200px;
 			padding: 0.75rem;

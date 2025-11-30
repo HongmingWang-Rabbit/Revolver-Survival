@@ -6,7 +6,7 @@ function _layout($$renderer, $$props) {
     let mounted = false;
     {
       $$renderer2.push("<!--[-->");
-      $$renderer2.push(`<div class="loading-screen svelte-12qhfyh"><div class="loading-content svelte-12qhfyh"><div class="spinner svelte-12qhfyh"></div> <p>Loading game...</p></div></div>`);
+      $$renderer2.push(`<div class="loading-screen svelte-12qhfyh"><div class="loading-content svelte-12qhfyh"><div class="spinner svelte-12qhfyh"></div> <p class="svelte-12qhfyh">Loading game...</p></div></div>`);
     }
     $$renderer2.push(`<!--]--> `);
     if (store_get($$store_subs ??= {}, "$rgsConfig", rgsConfig).isDemo && mounted) ;
