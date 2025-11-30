@@ -1,0 +1,68 @@
+{
+  "game": "revolver_survival",
+  "version": "1.0.0",
+  "description": "Russian Roulette inspired survival betting game",
+  "chambers": 6,
+  "modes": [
+    {
+      "name": "mode_1_bullet",
+      "cost": 1.0,
+      "events": "books_mode_1_bullet.jsonl.zst",
+      "weights": "lookUpTable_mode_1_bullet.csv",
+      "meta": {
+        "bullets": 1,
+        "survivalRate": 0.8333333333333334,
+        "multiplier": 1.17,
+        "displayName": "1 Bullet"
+      }
+    },
+    {
+      "name": "mode_2_bullet",
+      "cost": 1.0,
+      "events": "books_mode_2_bullet.jsonl.zst",
+      "weights": "lookUpTable_mode_2_bullet.csv",
+      "meta": {
+        "bullets": 2,
+        "survivalRate": 0.6666666666666666,
+        "multiplier": 1.47,
+        "displayName": "2 Bullets"
+      }
+    },
+    {
+      "name": "mode_3_bullet",
+      "cost": 1.0,
+      "events": "books_mode_3_bullet.jsonl.zst",
+      "weights": "lookUpTable_mode_3_bullet.csv",
+      "meta": {
+        "bullets": 3,
+        "survivalRate": 0.5,
+        "multiplier": 1.95,
+        "displayName": "3 Bullets"
+      }
+    },
+    {
+      "name": "mode_4_bullet",
+      "cost": 1.0,
+      "events": "books_mode_4_bullet.jsonl.zst",
+      "weights": "lookUpTable_mode_4_bullet.csv",
+      "meta": {
+        "bullets": 4,
+        "survivalRate": 0.3333333333333333,
+        "multiplier": 2.93,
+        "displayName": "4 Bullets"
+      }
+    },
+    {
+      "name": "mode_5_bullet",
+      "cost": 1.0,
+      "events": "books_mode_5_bullet.jsonl.zst",
+      "weights": "lookUpTable_mode_5_bullet.csv",
+      "meta": {
+        "bullets": 5,
+        "survivalRate": 0.16666666666666666,
+        "multiplier": 5.86,
+        "displayName": "5 Bullets"
+      }
+    }
+  ]
+}
