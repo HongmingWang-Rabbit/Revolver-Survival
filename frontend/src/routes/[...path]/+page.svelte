@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Header, BetControls, GameActions, StickMan } from '$lib';
+	import { Header, BetControls, GameActions, StickMan, GameDisclaimer } from '$lib';
 	import { roundState, GAME_MODES } from '$lib/stores/gameStore';
 
 	$: selectedMode = GAME_MODES.find(m => m.bullets === $roundState.selectedBullets);
@@ -8,7 +8,7 @@
 
 <svelte:head>
 	<title>Revolver Survival | High Stakes Survival Game</title>
-	<meta name="description" content="A high-stakes betting game inspired by Russian Roulette. Choose your risk, pull the trigger, survive and win!" />
+	<meta name="description" content="A high-stakes survival game inspired by Russian Roulette. Choose your risk, pull the trigger, survive and win!" />
 </svelte:head>
 
 <div class="game-container">
@@ -41,6 +41,8 @@
 			</aside>
 		</div>
 	</main>
+
+	<GameDisclaimer />
 </div>
 
 <style>

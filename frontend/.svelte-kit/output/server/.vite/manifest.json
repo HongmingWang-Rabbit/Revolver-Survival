@@ -14,11 +14,11 @@
     "name": "StickMan",
     "imports": [
       "_index2.js",
-      "_context.js",
-      "_index.js"
+      "_socialMode.js",
+      "_context.js"
     ],
     "css": [
-      "_app/immutable/assets/StickMan.Bh4c5XMR.css"
+      "_app/immutable/assets/StickMan.BLRghcwn.css"
     ]
   },
   "_context.js": {
@@ -70,6 +70,13 @@
       "_utils.js"
     ]
   },
+  "_socialMode.js": {
+    "file": "chunks/socialMode.js",
+    "name": "socialMode",
+    "imports": [
+      "_index.js"
+    ]
+  },
   "_utils.js": {
     "file": "chunks/utils.js",
     "name": "utils"
@@ -118,10 +125,11 @@
     "src": "src/routes/+layout.svelte",
     "isEntry": true,
     "imports": [
-      "_index2.js"
+      "_index2.js",
+      "_socialMode.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.CnaX-zj4.css"
+      "_app/immutable/assets/_layout.QwO6KcjO.css"
     ]
   },
   "src/routes/+page.svelte": {
@@ -132,6 +140,7 @@
     "imports": [
       "_index2.js",
       "_StickMan.js",
+      "_socialMode.js",
       "_context.js"
     ],
     "css": [
@@ -146,6 +155,7 @@
     "imports": [
       "_index2.js",
       "_StickMan.js",
+      "_socialMode.js",
       "_context.js"
     ],
     "css": [

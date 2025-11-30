@@ -6,14 +6,18 @@ CHAMBERS = 6          # Total chambers in revolver cylinder
 HOUSE_EDGE = 0.0233   # 2.33% house edge
 BULLET_RANGE = (1, 5) # Valid bullet counts
 
-# Multiplier precision for Stake Engine (6 decimal places as integer)
-PRECISION = 1000000
+# Multiplier precision for Stake Engine
+# Stake Engine format: multiplier * 100 (e.g., 1150 = 11.5x, 117 = 1.17x)
+PRECISION = 100
 
 def calculate_multiplier(bullets: int) -> float:
     """
     Calculate the payout multiplier for a given number of bullets.
 
     Formula: Multiplier = (CHAMBERS / empty_chambers) * (1 - HOUSE_EDGE)
+
+    Note: Mode 2 uses floor rounding (1.46 instead of 1.47) to keep
+    RTP variation across all modes within 0.5% requirement.
 
     Args:
         bullets: Number of bullets loaded (1-5)
@@ -26,6 +30,12 @@ def calculate_multiplier(bullets: int) -> float:
 
     empty_chambers = CHAMBERS - bullets
     multiplier = (CHAMBERS / empty_chambers) * (1 - HOUSE_EDGE)
+
+    # Use floor for mode 2 to reduce RTP variation across modes
+    if bullets == 2:
+        import math
+        return math.floor(multiplier * 100) / 100
+
     return round(multiplier, 2)
 
 

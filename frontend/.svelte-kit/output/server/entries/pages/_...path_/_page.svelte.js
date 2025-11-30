@@ -1,5 +1,6 @@
-import { a as store_get, h as head, b as attr_class, u as unsubscribe_stores } from "../../../chunks/index2.js";
-import { G as GAME_MODES, H as Header, B as BetControls, S as StickMan, a as GameActions, r as roundState } from "../../../chunks/StickMan.js";
+import { s as store_get, h as head, a as attr_class, u as unsubscribe_stores } from "../../../chunks/index2.js";
+import { H as Header, B as BetControls, S as StickMan, G as GameActions, a as GameDisclaimer } from "../../../chunks/StickMan.js";
+import { G as GAME_MODES, a as roundState } from "../../../chunks/socialMode.js";
 import { X as escape_html } from "../../../chunks/context.js";
 function _page($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
@@ -11,7 +12,7 @@ function _page($$renderer, $$props) {
       $$renderer3.title(($$renderer4) => {
         $$renderer4.push(`<title>Revolver Survival | High Stakes Survival Game</title>`);
       });
-      $$renderer3.push(`<meta name="description" content="A high-stakes betting game inspired by Russian Roulette. Choose your risk, pull the trigger, survive and win!"/>`);
+      $$renderer3.push(`<meta name="description" content="A high-stakes survival game inspired by Russian Roulette. Choose your risk, pull the trigger, survive and win!"/>`);
     });
     $$renderer2.push(`<div class="game-container svelte-1pgso1u">`);
     Header($$renderer2);
@@ -28,7 +29,9 @@ function _page($$renderer, $$props) {
     }
     $$renderer2.push(`<!--]--></section> <aside class="right-panel svelte-1pgso1u">`);
     GameActions($$renderer2);
-    $$renderer2.push(`<!----></aside></div></main></div>`);
+    $$renderer2.push(`<!----></aside></div></main> `);
+    GameDisclaimer($$renderer2);
+    $$renderer2.push(`<!----></div>`);
     if ($$store_subs) unsubscribe_stores($$store_subs);
   });
 }

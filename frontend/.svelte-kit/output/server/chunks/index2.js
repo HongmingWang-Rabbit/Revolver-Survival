@@ -881,15 +881,6 @@ function unsubscribe_stores(store_values) {
     store_values[store_name][1]();
   }
 }
-function slot(renderer, $$props, name, slot_props, fallback_fn) {
-  var slot_fn = $$props.$$slots?.[name];
-  if (slot_fn === true) {
-    slot_fn = $$props["children"];
-  }
-  if (slot_fn !== void 0) {
-    slot_fn(renderer, slot_props);
-  }
-}
 function ensure_array_like(array_like_or_iterator) {
   if (array_like_or_iterator) {
     return array_like_or_iterator.length !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
@@ -897,14 +888,13 @@ function ensure_array_like(array_like_or_iterator) {
   return [];
 }
 export {
-  store_get as a,
-  attr_class as b,
-  attr as c,
-  stringify as d,
+  attr_class as a,
+  attr as b,
+  stringify as c,
   ensure_array_like as e,
   head as h,
   is_passive_event as i,
   render as r,
-  slot as s,
+  store_get as s,
   unsubscribe_stores as u
 };

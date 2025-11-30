@@ -2,15 +2,21 @@
 	import {
 		balance,
 		roundState,
+		rgsConfig,
 		setBetAmount,
 		setSelectedBullets,
 		placeBet,
 		canPlaceBet,
-		GAME_MODES,
-		MIN_BET,
-		MAX_BET
+		GAME_MODES
 	} from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
+	import { TEXT } from '$lib/utils/socialMode';
+
+	// Social text stores
+	const placeBetText = TEXT.placeBet;
+	const betAmountText = TEXT.betAmount;
+	const placeBetBtnText = TEXT.placeBetBtn;
+	const betPlacedText = TEXT.betPlaced;
 
 	// Local input value
 	let betInput = '1.00';
@@ -19,6 +25,10 @@
 	$: selectedBullets = $roundState.selectedBullets;
 	$: gameState = $roundState.gameState;
 	$: canBet = $canPlaceBet;
+	$: minBet = $rgsConfig.minBet;
+	$: maxBet = $rgsConfig.maxBet;
+	$: currency = $rgsConfig.currency;
+	$: betLevels = $rgsConfig.betLevels;
 
 	// Sync input with store
 	$: betInput = currentBet.toFixed(2);
@@ -33,7 +43,12 @@
 
 	function adjustBet(multiplier: number) {
 		const newBet = currentBet * multiplier;
-		setBetAmount(Math.max(MIN_BET, Math.min(MAX_BET, newBet)));
+		setBetAmount(Math.max(minBet, Math.min(maxBet, newBet)));
+		SFX.play('click');
+	}
+
+	function selectBetLevel(amount: number) {
+		setBetAmount(amount);
 		SFX.play('click');
 	}
 
@@ -49,6 +64,17 @@
 		}
 	}
 
+	// Format bet amount for display
+	function formatBetAmount(amount: number): string {
+		if (amount >= 1000) {
+			return `${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}K`;
+		}
+		if (amount >= 1) {
+			return amount % 1 === 0 ? amount.toFixed(0) : amount.toFixed(2);
+		}
+		return amount.toFixed(2);
+	}
+
 	// Get mode info for selected bullets
 	$: currentMode = GAME_MODES.find(m => m.bullets === selectedBullets);
 </script>
@@ -57,30 +83,52 @@
 	<!-- Title/Instruction -->
 	{#if gameState === 'idle'}
 		<div class="panel-header">
-			<span class="panel-title">Place your bet</span>
+			<span class="panel-title">{$placeBetText}</span>
 			<span class="panel-subtitle">Load the chamber and pull the trigger</span>
 		</div>
 	{/if}
 
-	<!-- Bet Amount Section -->
+	<!-- Play Amount Section -->
 	<div class="bet-section">
-		<span class="section-label">BET AMOUNT</span>
+		<span class="section-label">{$betAmountText}</span>
 		<div class="bet-input-group">
 			<button class="adjust-btn" on:click={() => adjustBet(0.5)}>1/2</button>
-			<div class="input-wrapper">
-				<span class="currency">$</span>
-				<input
-					type="number"
-					bind:value={betInput}
-					on:change={handleBetInput}
-					min={MIN_BET}
-					max={MAX_BET}
-					step="0.01"
-					disabled={gameState !== 'idle'}
-				/>
-			</div>
+
+			{#if betLevels.length > 0}
+				<!-- Dropdown for bet levels from RGS -->
+				<div class="select-wrapper">
+					<span class="currency">$</span>
+					<select
+						bind:value={currentBet}
+						on:change={(e) => selectBetLevel(parseFloat(e.currentTarget.value))}
+						disabled={gameState !== 'idle'}
+					>
+						{#each betLevels as level}
+							<option value={level.amount}>
+								{formatBetAmount(level.amount)}{level.default ? ' ★' : ''}
+							</option>
+						{/each}
+					</select>
+				</div>
+			{:else}
+				<!-- Manual input fallback -->
+				<div class="input-wrapper">
+					<span class="currency">$</span>
+					<input
+						type="number"
+						bind:value={betInput}
+						on:change={handleBetInput}
+						min={minBet}
+						max={maxBet}
+						step="0.01"
+						disabled={gameState !== 'idle'}
+					/>
+				</div>
+			{/if}
+
 			<button class="adjust-btn" on:click={() => adjustBet(2)}>2x</button>
 		</div>
+
 		<div class="balance-display">
 			Balance: <span class="balance-value">${$balance.toFixed(2)}</span>
 		</div>
@@ -118,16 +166,16 @@
 		</div>
 	{/if}
 
-	<!-- Place Bet Button -->
+	<!-- Place Play Button -->
 	<button
 		class="place-bet-btn"
 		on:click={handlePlaceBet}
 		disabled={!canBet}
 	>
 		{#if gameState === 'idle'}
-			PLACE BET
+			{$placeBetBtnText}
 		{:else}
-			BET PLACED
+			{$betPlacedText}
 		{/if}
 	</button>
 </div>
@@ -228,6 +276,52 @@
 		background: var(--color-accent);
 	}
 
+	/* Select Dropdown */
+	.select-wrapper {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		background: var(--color-bg);
+		border: 1px solid var(--color-bg-tertiary);
+		border-radius: 8px;
+		padding: 0.75rem;
+		position: relative;
+	}
+
+	.select-wrapper select {
+		flex: 1;
+		background: transparent;
+		color: var(--color-text);
+		font-size: 1.25rem;
+		font-weight: bold;
+		border: none;
+		outline: none;
+		cursor: pointer;
+		appearance: none;
+		-webkit-appearance: none;
+		padding-right: 1.5rem;
+	}
+
+	.select-wrapper::after {
+		content: '▼';
+		position: absolute;
+		right: 0.75rem;
+		color: var(--color-text-muted);
+		font-size: 0.625rem;
+		pointer-events: none;
+	}
+
+	.select-wrapper select option {
+		background: var(--color-bg-secondary);
+		color: var(--color-text);
+		padding: 0.5rem;
+	}
+
+	.select-wrapper select:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
 	.balance-display {
 		margin-top: 0.5rem;
 		font-size: 0.875rem;
@@ -242,15 +336,17 @@
 	/* Bullet Selection */
 	.bullet-buttons {
 		display: flex;
-		gap: 0.5rem;
+		gap: 0.35rem;
+		width: 100%;
 	}
 
 	.bullet-btn {
 		flex: 1;
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0.75rem 0.5rem;
+		padding: 0.5rem 0.25rem;
 		background: var(--color-bg);
 		border: 2px solid var(--color-bg-tertiary);
 		border-radius: 8px;
@@ -268,12 +364,12 @@
 	}
 
 	.bullet-count {
-		font-size: 1.25rem;
+		font-size: 1.1rem;
 		font-weight: bold;
 	}
 
 	.bullet-mult {
-		font-size: 0.75rem;
+		font-size: 0.65rem;
 		color: var(--color-text-muted);
 	}
 
@@ -367,6 +463,10 @@
 
 		.place-bet-btn {
 			padding: 0.875rem;
+			font-size: 1rem;
+		}
+
+		.select-wrapper select {
 			font-size: 1rem;
 		}
 	}

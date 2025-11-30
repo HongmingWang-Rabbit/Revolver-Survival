@@ -7,7 +7,8 @@
 	$: gameState = $roundState.gameState;
 	$: bullets = $roundState.selectedBullets;
 
-	$: survived = result?.events.find(e => e.type === 'outcome')?.status === 'survived';
+	// Use payoutMultiplier to determine survival - more reliable than events
+	$: survived = (result?.payoutMultiplier || 0) > 0;
 
 	// Determine pose based on game state
 	$: pose = (() => {

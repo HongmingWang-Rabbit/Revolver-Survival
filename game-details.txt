@@ -1,0 +1,46 @@
+================================================================================
+REVOLVER SURVIVAL - GAME DETAILS
+================================================================================
+--------------------------------------------------------------------------------
+GAME DESCRIPTION
+--------------------------------------------------------------------------------
+
+Revolver Survival is a high-stakes survival game inspired by Russian Roulette.
+Players choose their risk level by selecting how many bullets to load into a
+6-chamber revolver, then pull the trigger. Survive and win multiplied rewards,
+or face elimination.
+
+--------------------------------------------------------------------------------
+GAME MODES
+--------------------------------------------------------------------------------
+
+Mode            Bullets    Survival Rate    Multiplier    RTP
+---------------------------------------------------------------------------
+1 Bullet        1          83.33%           1.17x         97.50%
+2 Bullets       2          66.67%           1.46x         97.33%
+3 Bullets       3          50.00%           1.95x         97.50%
+4 Bullets       4          33.33%           2.93x         97.67%
+5 Bullets       5          16.67%           5.86x         97.67%
+
+--------------------------------------------------------------------------------
+MATHEMATICAL SPECIFICATIONS
+--------------------------------------------------------------------------------
+
+- Chambers: 6
+- House Edge: 2.33%
+- RTP Range: 97.33% - 97.67%
+- RTP Variation: 0.34% (within 0.5% requirement)
+- Mode Cost: 1.0 (all modes)
+
+--------------------------------------------------------------------------------
+FEATURES
+--------------------------------------------------------------------------------
+
+- Double or Nothing: After surviving, players can continue betting their
+  winnings for higher rewards or cash out
+- Social Mode Support: Compliant terminology for Stake.us social gaming
+- RGS Integration: Full Stake Engine RGS API integration
+- Demo Mode: Fallback demo mode when RGS is unavailable
+- Responsive Design: Mobile and desktop compatible
+
+================================================================================

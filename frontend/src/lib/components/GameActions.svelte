@@ -4,13 +4,17 @@
 		isSpinning,
 		showResult,
 		spin,
-		cashOut,
 		continueBetting,
+		cashOut,
 		canSpin,
-		currentMode,
 		potentialWin
 	} from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
+	import { TEXT } from '$lib/utils/socialMode';
+
+	// Social text stores
+	const betAmountText = TEXT.betAmount;
+	const cashOutText = TEXT.cashOut;
 
 	$: gameState = $roundState.gameState;
 	$: currentPot = $roundState.currentPot;
@@ -18,13 +22,13 @@
 	$: result = $roundState.lastResult;
 	$: showingResult = $showResult;
 	$: canSpinNow = $canSpin;
-	$: mode = $currentMode;
 	$: potential = $potentialWin;
 
-	$: survived = result?.events.find(e => e.type === 'outcome')?.status === 'survived';
+	// Use payoutMultiplier to determine survival - more reliable than events
+	$: survived = (result?.payoutMultiplier || 0) > 0;
 
 	// Track if we've played the result sound for this result
-	let lastPlayedResultId: number | null = null;
+	let lastPlayedResultId: number | string | null = null;
 
 	// Play sound when result is shown
 	$: if (showingResult && result && result.id !== lastPlayedResultId) {
@@ -43,14 +47,14 @@
 		await spin();
 	}
 
-	function handleCashOut() {
-		SFX.play('cashout');
-		cashOut();
-	}
-
 	function handleContinue() {
 		SFX.play('click');
 		continueBetting();
+	}
+
+	async function handleCashOut() {
+		SFX.play('cashout');
+		await cashOut(); // Call RGS to end round and update balance
 	}
 </script>
 
@@ -61,7 +65,7 @@
 		<!-- Spin Button -->
 		<div class="action-group">
 			<div class="pot-display">
-				<span class="pot-label">CURRENT POT</span>
+				<span class="pot-label">{gameState === 'continue' ? 'POT AT RISK' : $betAmountText}</span>
 				<span class="pot-value">${currentPot.toFixed(2)}</span>
 			</div>
 
@@ -85,7 +89,7 @@
 
 			{#if gameState === 'continue'}
 				<button class="cashout-btn" on:click={handleCashOut}>
-					CASH OUT ${currentPot.toFixed(2)}
+					{$cashOutText} ${currentPot.toFixed(2)}
 				</button>
 			{/if}
 		</div>
@@ -106,13 +110,13 @@
 						DOUBLE OR NOTHING
 					</button>
 					<button class="cashout-btn" on:click={handleCashOut}>
-						CASH OUT
+						{$cashOutText}
 					</button>
 				</div>
 			{:else}
 				<div class="loss-display">
 					<span class="loss-label">GAME OVER</span>
-					<span class="loss-message">Better luck next time...</span>
+					<span class="loss-message">You lost ${currentPot.toFixed(2)}</span>
 				</div>
 			{/if}
 		</div>
@@ -306,13 +310,6 @@
 
 	.loss-message {
 		color: var(--color-text-muted);
-	}
-
-	.action-buttons {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		width: 100%;
 	}
 
 	/* Responsive */
