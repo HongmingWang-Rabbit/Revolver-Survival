@@ -45,15 +45,16 @@
 	// Track if we've played the result sound for this result
 	let lastPlayedResultId: number | string | null = null;
 
-	// Play sound when result is shown
+	// Play sound when result is shown (delayed to match animation timing)
 	$: if (showingResult && result && result.id !== lastPlayedResultId) {
 		lastPlayedResultId = result.id;
+		const { timing } = gameConfig;
 		if (result.payoutMultiplier > 0) {
-			SFX.play('empty');
-			setTimeout(() => SFX.play('win'), gameConfig.timing.winSoundDelay);
+			setTimeout(() => SFX.play('empty'), timing.emptySoundDelay);
+			setTimeout(() => SFX.play('win'), timing.winSoundDelay);
 		} else {
-			SFX.play('bang');
-			setTimeout(() => SFX.play('death'), gameConfig.timing.deathSoundDelay);
+			setTimeout(() => SFX.play('bang'), timing.bangSoundDelay);
+			setTimeout(() => SFX.play('death'), timing.bangSoundDelay + timing.deathSoundDelay);
 		}
 	}
 
