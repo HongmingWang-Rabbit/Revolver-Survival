@@ -10,7 +10,8 @@
 	let spine: Spine | null = null;
 	let currentAnimation = '';
 
-	const { animations, nonLoopingAnimations } = spineConfig;
+	// Extract config values
+	const { animations, nonLoopingAnimations, canvas, scale: baseScale, position } = spineConfig;
 
 	$: spinning = $isSpinning;
 	$: result = $roundState.lastResult;
@@ -25,16 +26,6 @@
 		playAnimation(targetAnimation);
 	}
 
-	/**
-	 * Determine the correct animation based on game state and spin count
-	 *
-	 * Animation flow:
-	 * - A1: Default idle
-	 * - A2: Loading bullets (betting state)
-	 * - B1/B2/B3_2: Aiming (based on spin count)
-	 * - A3/A4: Survival idle (based on survival count)
-	 * - B3_1: Death (gun fires)
-	 */
 	function getTargetAnimation(
 		showingResult: boolean,
 		survived: boolean,
@@ -42,28 +33,18 @@
 		gameState: string,
 		spinCount: number
 	): string {
-		// Death - always B3_1
 		if (showingResult && !survived) {
 			return animations.death;
 		}
-
-		// Survived - use appropriate survival idle (A3 or A4)
 		if (showingResult && survived) {
-			// spinCount represents how many times we've spun, which equals survival count when showing result
 			return getWinAnimation(spinCount);
 		}
-
-		// Currently spinning/aiming - use appropriate aiming animation (B1, B2, or B3_2)
 		if (spinning) {
 			return getSpinningAnimation(spinCount);
 		}
-
-		// Betting state - loading bullets animation
 		if (gameState === 'betting' || gameState === 'continue') {
 			return animations.betting;
 		}
-
-		// Default idle
 		return animations.idle;
 	}
 
@@ -80,16 +61,45 @@
 		currentAnimation = name;
 	}
 
+	function resizeCanvas() {
+		if (!app || !spine || !container) return;
+
+		const rect = container.getBoundingClientRect();
+		const width = rect.width || canvas.width;
+		const height = rect.height || canvas.height;
+
+		// Resize the renderer
+		app.renderer.resize(width, height);
+
+		// Calculate scale based on container size relative to base canvas size
+		const scaleX = width / canvas.width;
+		const scaleY = height / canvas.height;
+		const scaleFactor = Math.min(scaleX, scaleY);
+
+		// Apply scale to spine - center horizontally and vertically
+		spine.scale.set(baseScale * scaleFactor);
+		spine.x = width / 2;
+		// Position from center, accounting for character's anchor point
+		spine.y = height / 2 + (height * position.verticalOffset);
+	}
+
+	let resizeObserver: ResizeObserver | null = null;
+
 	onMount(async () => {
 		try {
+			const rect = container.getBoundingClientRect();
+			const initialWidth = rect.width || canvas.width;
+			const initialHeight = rect.height || canvas.height;
+
 			app = new Application();
 			await app.init({
 				background: 'transparent',
 				backgroundAlpha: 0,
-				width: spineConfig.canvas.width,
-				height: spineConfig.canvas.height,
+				width: initialWidth,
+				height: initialHeight,
 				resolution: window.devicePixelRatio || 1,
 				autoDensity: true,
+				resizeTo: container,
 			});
 
 			container.appendChild(app.canvas);
@@ -105,18 +115,31 @@
 			});
 
 			spine.state.data.defaultMix = spineConfig.defaultMixDuration;
-			spine.scale.set(spineConfig.scale);
-			spine.x = app.screen.width / 2;
-			spine.y = app.screen.height - 20;
-
 			app.stage.addChild(spine);
+
+			// Initial positioning
+			resizeCanvas();
 			playAnimation(animations.idle);
+
+			// Listen for resize
+			window.addEventListener('resize', resizeCanvas);
+
+			// Use ResizeObserver for container size changes
+			resizeObserver = new ResizeObserver(() => {
+				resizeCanvas();
+			});
+			resizeObserver.observe(container);
 		} catch {
 			// Spine initialization failed - character won't be visible
 		}
 	});
 
 	onDestroy(() => {
+		window.removeEventListener('resize', resizeCanvas);
+		if (resizeObserver) {
+			resizeObserver.disconnect();
+			resizeObserver = null;
+		}
 		if (app) {
 			app.destroy(true, { children: true });
 			app = null;
@@ -144,8 +167,10 @@
 <style>
 	.spine-container {
 		position: relative;
-		width: 300px;
-		height: 400px;
+		width: 100%;
+		height: 100%;
+		min-width: 200px;
+		min-height: 300px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -154,14 +179,16 @@
 
 	.spine-container :global(canvas) {
 		display: block;
+		width: 100% !important;
+		height: 100% !important;
 	}
 
 	.status-msg {
 		position: absolute;
-		bottom: 0;
+		bottom: 10px;
 		left: 50%;
 		transform: translateX(-50%);
-		font-size: 1rem;
+		font-size: clamp(0.75rem, 2vw, 1rem);
 		font-weight: bold;
 		text-transform: uppercase;
 		letter-spacing: 0.1em;
@@ -170,8 +197,8 @@
 	}
 
 	.status-msg .dead {
-		color: var(--color-accent);
-		text-shadow: 0 0 20px var(--color-accent);
+		color: var(--color-danger);
+		text-shadow: 0 0 20px var(--color-danger);
 	}
 	.status-msg .alive {
 		color: var(--color-success);
@@ -189,12 +216,7 @@
 	}
 
 	@keyframes blink {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.5;
-		}
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.5; }
 	}
 </style>

@@ -44,9 +44,9 @@ const DEMO_CONFIG: RGSConfig = {
 	error: null,
 	minBet: gameConfig.demo.betLevels[0],
 	maxBet: gameConfig.demo.betLevels[gameConfig.demo.betLevels.length - 1],
-	stepBet: 0.01,
+	stepBet: gameConfig.demo.stepBet,
 	defaultBet: gameConfig.demo.defaultBet,
-	betLevels: gameConfig.demo.betLevels.map((amount, index) => ({
+	betLevels: gameConfig.demo.betLevels.map((amount) => ({
 		amount,
 		default: amount === gameConfig.demo.defaultBet
 	})),
@@ -57,7 +57,7 @@ const DEMO_CONFIG: RGSConfig = {
 const initialRoundState: RoundState = {
 	gameState: 'idle',
 	selectedBullets: 1,
-	betAmount: 1.00,
+	betAmount: gameConfig.demo.defaultBet,
 	currentPot: 0,
 	lastResult: null,
 	roundHistory: [],
@@ -68,10 +68,10 @@ const initialRGSConfig: RGSConfig = {
 	initialized: false,
 	loading: false,
 	error: null,
-	minBet: 0.01,
-	maxBet: 1000,
-	stepBet: 0.01,
-	defaultBet: 1.00,
+	minBet: gameConfig.demo.betLevels[0],
+	maxBet: gameConfig.demo.betLevels[gameConfig.demo.betLevels.length - 1],
+	stepBet: gameConfig.demo.stepBet,
+	defaultBet: gameConfig.demo.defaultBet,
 	betLevels: [],
 	currency: 'USD',
 	isDemo: true
@@ -86,6 +86,40 @@ export const roundState = writable<RoundState>(initialRoundState);
 export const isSpinning = writable<boolean>(false);
 export const showResult = writable<boolean>(false);
 export const rgsConfig = writable<RGSConfig>(initialRGSConfig);
+
+// ============================================
+// Auto Bet State
+// ============================================
+
+export interface AutoBetConfig {
+	isRunning: boolean;
+	shouldStop: boolean;
+	totalBets: number;
+	completedBets: number;
+	wins: number;
+	losses: number;
+	stopOnWins: number;
+	continueShots: number;
+	currentContinueCount: number;
+	profit: number;
+	startingBalance: number;
+}
+
+const initialAutoBetConfig: AutoBetConfig = {
+	isRunning: false,
+	shouldStop: false,
+	totalBets: gameConfig.autoBet.defaultBets,
+	completedBets: 0,
+	wins: 0,
+	losses: 0,
+	stopOnWins: 0,
+	continueShots: 0,
+	currentContinueCount: 0,
+	profit: 0,
+	startingBalance: 0,
+};
+
+export const autoBetConfig = writable<AutoBetConfig>(initialAutoBetConfig);
 
 // ============================================
 // Derived Stores
@@ -225,16 +259,12 @@ export function setBetAmount(amount: number) {
 }
 
 export function setSelectedBullets(bullets: number) {
-	if (bullets >= 1 && bullets <= 5) {
+	if (bullets >= 1 && bullets <= GAME_MODES.length) {
 		roundState.update(state => ({
 			...state,
 			selectedBullets: bullets
 		}));
 	}
-}
-
-export function selectBetLevel(amount: number) {
-	setBetAmount(amount);
 }
 
 export async function placeBet(): Promise<boolean> {
@@ -423,4 +453,76 @@ export async function refreshBalance(): Promise<void> {
 	} catch {
 		// Silent fail - balance will sync on next successful operation
 	}
+}
+
+// ============================================
+// Auto Bet Actions
+// ============================================
+
+export function startAutoBet(config: { totalBets: number; stopOnWins: number; continueShots: number }) {
+	const currentBalance = get(balance);
+
+	autoBetConfig.set({
+		isRunning: true,
+		shouldStop: false,
+		totalBets: config.totalBets,
+		completedBets: 0,
+		wins: 0,
+		losses: 0,
+		stopOnWins: config.stopOnWins,
+		continueShots: config.continueShots,
+		currentContinueCount: 0,
+		profit: 0,
+		startingBalance: currentBalance,
+	});
+}
+
+export function incrementContinueCount() {
+	autoBetConfig.update(c => ({ ...c, currentContinueCount: c.currentContinueCount + 1 }));
+}
+
+export function resetContinueCount() {
+	autoBetConfig.update(c => ({ ...c, currentContinueCount: 0 }));
+}
+
+export function stopAutoBet() {
+	autoBetConfig.update(c => ({ ...c, shouldStop: true }));
+}
+
+export function resetAutoBet() {
+	autoBetConfig.set(initialAutoBetConfig);
+}
+
+export function updateAutoBetStats(won: boolean, payout: number, betAmount: number) {
+	autoBetConfig.update(c => ({
+		...c,
+		completedBets: c.completedBets + 1,
+		wins: won ? c.wins + 1 : c.wins,
+		losses: won ? c.losses : c.losses + 1,
+		profit: c.profit + (won ? payout - betAmount : -betAmount),
+	}));
+}
+
+export function shouldStopAutoBet(): boolean {
+	const config = get(autoBetConfig);
+
+	// Check if manually stopped
+	if (config.shouldStop) return true;
+
+	// Check if completed all bets
+	if (config.completedBets >= config.totalBets) return true;
+
+	// Check stop on wins condition
+	if (config.stopOnWins > 0 && config.wins >= config.stopOnWins) return true;
+
+	// Check if balance is too low
+	const currentBalance = get(balance);
+	const state = get(roundState);
+	if (currentBalance < state.betAmount) return true;
+
+	return false;
+}
+
+export function finalizeAutoBet() {
+	autoBetConfig.update(c => ({ ...c, isRunning: false, shouldStop: false }));
 }

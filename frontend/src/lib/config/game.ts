@@ -29,6 +29,8 @@ export interface GameConfig {
     startingBalance: number;
     /** Default bet amount */
     defaultBet: number;
+    /** Minimum bet step increment */
+    stepBet: number;
     /** Bet levels available in demo mode */
     betLevels: number[];
   };
@@ -48,6 +50,19 @@ export interface GameConfig {
     bangSoundDelay: number;
     /** Delay before death feedback sound after gunshot */
     deathSoundDelay: number;
+    /** Delay before spin in auto bet */
+    autoBetSpinDelay: number;
+    /** Delay between auto bet rounds */
+    autoBetRoundDelay: number;
+  };
+  /** Auto bet configuration */
+  autoBet: {
+    /** Default number of bets */
+    defaultBets: number;
+    /** Maximum number of bets allowed */
+    maxBets: number;
+    /** Maximum continue shots allowed */
+    maxContinueShots: number;
   };
   /** Sound configuration */
   sounds: {
@@ -71,6 +86,7 @@ export const gameConfig: GameConfig = {
   demo: {
     startingBalance: 100.0,
     defaultBet: 1.0,
+    stepBet: 0.01,
     betLevels: [0.1, 0.5, 1.0, 5.0, 10.0, 50.0, 100.0],
   },
   timing: {
@@ -81,6 +97,13 @@ export const gameConfig: GameConfig = {
     winSoundDelay: 800,
     bangSoundDelay: 1500,
     deathSoundDelay: 200,
+    autoBetSpinDelay: 500,
+    autoBetRoundDelay: 800,
+  },
+  autoBet: {
+    defaultBets: 10,
+    maxBets: 100,
+    maxContinueShots: 10,
   },
   sounds: {
     basePath: "sounds",
@@ -96,6 +119,3 @@ export const gameConfig: GameConfig = {
     },
   },
 };
-
-/** Default bet level index (1.00 = index 2) */
-export const DEFAULT_BET_LEVEL_INDEX = 2;

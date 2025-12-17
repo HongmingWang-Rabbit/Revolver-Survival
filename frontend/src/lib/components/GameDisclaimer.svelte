@@ -127,7 +127,7 @@
 		width: 32px;
 		height: 32px;
 		border-radius: 50%;
-		background: var(--color-bg-secondary);
+		background: var(--color-panel);
 		border: 1px solid var(--color-bg-tertiary);
 		display: flex;
 		align-items: center;
@@ -168,9 +168,9 @@
 	}
 
 	.disclaimer-modal {
-		background: var(--color-bg-secondary);
+		background: var(--color-panel);
 		border: 1px solid var(--color-bg-tertiary);
-		border-radius: 12px;
+		border-radius: 16px;
 		padding: 1.5rem;
 		max-width: 520px;
 		width: 100%;

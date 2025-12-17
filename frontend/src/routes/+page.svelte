@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Header, BetControls, GameActions, SpineCharacter, GameDisclaimer } from '$lib';
+	import { Header, BetControls, SpineCharacter, GameDisclaimer } from '$lib';
 	import { roundState, GAME_MODES, placeBet, spin, canPlaceBet, canSpin, isSpinning } from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
 
 	$: selectedMode = GAME_MODES.find(m => m.bullets === $roundState.selectedBullets);
 	$: gameState = $roundState.gameState;
+	$: currentPot = $roundState.currentPot;
 
 	// Space bar keyboard binding
 	function handleKeydown(event: KeyboardEvent) {
@@ -39,26 +40,26 @@
 				<BetControls />
 			</aside>
 
-			<!-- Center: Game Scene -->
-			<section class="center-panel">
+			<!-- Right: Game Scene -->
+			<section class="right-panel">
 				<div class="game-scene">
 					<SpineCharacter />
+
+					<!-- Multiplier badges shown during active game -->
+					{#if gameState !== 'idle' && selectedMode}
+						<div class="multiplier-badges">
+							<div class="multiplier-badge potential">
+								<span class="badge-value">{selectedMode.multiplier.toFixed(2)}X</span>
+							</div>
+							{#if gameState === 'continue' || gameState === 'result'}
+								<div class="multiplier-badge current">
+									<span class="badge-value">{(currentPot / $roundState.betAmount).toFixed(2)}X</span>
+								</div>
+							{/if}
+						</div>
+					{/if}
 				</div>
-
-				{#if selectedMode}
-					<div class="mode-badge" class:active={gameState !== 'idle'}>
-						<span class="mode-bullets">{selectedMode.bullets} Bullet{selectedMode.bullets > 1 ? 's' : ''}</span>
-						<span class="mode-odds">{(selectedMode.survivalRate * 100).toFixed(0)}% Survival</span>
-					</div>
-				{/if}
 			</section>
-
-			<!-- Right Panel: Game Actions (only shown after bet is placed) -->
-			{#if gameState !== 'idle'}
-				<aside class="right-panel">
-					<GameActions />
-				</aside>
-			{/if}
 		</div>
 	</main>
 
@@ -67,12 +68,11 @@
 
 <style>
 	.game-container {
-		min-height: 100vh;
+		height: 100vh;
 		display: flex;
 		flex-direction: column;
-		background:
-			radial-gradient(ellipse at center, var(--color-bg-secondary) 0%, var(--color-bg) 70%),
-			var(--color-bg);
+		background: var(--color-bg);
+		overflow: hidden;
 	}
 
 	.game-main {
@@ -80,128 +80,140 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 2rem;
+		padding: 1rem 2rem 2rem;
+		min-height: 0;
 	}
 
 	.game-layout {
 		display: flex;
-		align-items: center;
+		align-items: stretch;
 		justify-content: center;
-		gap: 3rem;
-		max-width: 1200px;
+		gap: 2rem;
 		width: 100%;
+		max-width: 1000px;
+		height: 100%;
+		max-height: 600px;
 	}
 
-	.left-panel, .right-panel {
+	.left-panel {
 		flex-shrink: 0;
+		display: flex;
+		align-items: stretch;
 	}
 
-	.center-panel {
+	.right-panel {
+		flex: 1;
 		display: flex;
-		flex-direction: column;
+		justify-content: center;
 		align-items: center;
-		gap: 1.5rem;
+		position: relative;
+		min-width: 300px;
 	}
 
 	.game-scene {
+		width: 100%;
+		height: 100%;
+		max-width: 500px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 2rem;
-		background: radial-gradient(circle at 50% 40%, var(--color-bg-highlight) 0%, var(--color-bg) 70%);
-		border-radius: 20px;
-		min-height: 350px;
+		position: relative;
 	}
 
-	.mode-badge {
+	/* Multiplier Badges */
+	.multiplier-badges {
+		position: absolute;
+		top: 20px;
+		right: 20px;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		padding: 0.75rem 1.5rem;
-		background: var(--color-bg-secondary);
-		border: 1px solid var(--color-bg-tertiary);
+		gap: 8px;
+	}
+
+	.multiplier-badge {
+		padding: 8px 16px;
 		border-radius: 8px;
-		transition: all 0.3s ease;
+		font-weight: 700;
+		font-size: 14px;
 	}
 
-	.mode-badge.active {
-		border-color: var(--color-accent);
-		box-shadow: 0 0 20px rgba(255, 68, 68, 0.2);
+	.multiplier-badge.potential {
+		background: var(--color-accent);
+		color: white;
 	}
 
-	.mode-bullets {
-		font-size: 1.125rem;
-		font-weight: bold;
-		color: var(--color-accent);
+	.multiplier-badge.current {
+		background: var(--color-bg-tertiary);
+		color: var(--color-text);
 	}
 
-	.mode-odds {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
+	.badge-value {
+		font-family: var(--font-primary);
+		font-variant-numeric: tabular-nums;
 	}
 
 	/* Responsive layout */
 	@media (max-width: 1200px) {
 		.game-layout {
-			gap: 2rem;
+			gap: 1.5rem;
 		}
 	}
 
 	/* Portrait mobile and tablet - vertical stack */
 	@media (max-width: 1024px) and (min-height: 500px) {
+		.game-main {
+			padding: 1rem;
+		}
+
 		.game-layout {
 			flex-direction: column;
 			gap: 1rem;
+			max-height: none;
 		}
 
-		.left-panel, .right-panel {
+		.left-panel {
 			width: 100%;
 			max-width: 400px;
+			align-self: center;
 		}
 
-		.game-main {
-			padding: 1rem;
+		.right-panel {
+			flex: 1;
+			min-height: 300px;
+			max-height: 400px;
 		}
 	}
 
 	/* Landscape popout/small screens - keep horizontal, compact */
 	@media (max-height: 500px) {
 		.game-main {
-			padding: 0.5rem !important;
-		}
-
-		.game-layout {
-			flex-direction: row !important;
-			gap: 1rem !important;
-			align-items: center !important;
-		}
-
-		.left-panel, .right-panel {
-			width: auto !important;
-			max-width: none !important;
-		}
-
-		.game-scene {
-			min-height: auto !important;
-			height: calc(100vh - 100px);
-			max-height: 280px;
 			padding: 0.5rem;
 		}
 
-		.center-panel {
-			gap: 0.5rem;
+		.game-layout {
+			flex-direction: row;
+			gap: 1rem;
+			max-height: none;
+			height: 100%;
 		}
 
-		.mode-badge {
-			padding: 0.25rem 0.75rem;
+		.left-panel {
+			width: auto;
+			max-width: none;
 		}
 
-		.mode-bullets {
-			font-size: 0.875rem;
+		.right-panel {
+			flex: 1;
 		}
 
-		.mode-odds {
-			font-size: 0.625rem;
+		.multiplier-badges {
+			top: 10px;
+			right: 10px;
+		}
+
+		.multiplier-badge {
+			padding: 4px 10px;
+			font-size: 12px;
 		}
 	}
 
@@ -215,35 +227,14 @@
 			gap: 0.5rem;
 		}
 
-		.game-scene {
-			height: calc(100vh - 60px);
-			max-height: 160px;
-			padding: 0.25rem;
-			border-radius: 8px;
-		}
-
-		.mode-badge {
+		.multiplier-badges {
 			display: none;
 		}
 	}
 
 	@media (max-width: 768px) and (min-height: 500px) {
-		.game-scene {
-			padding: 1.5rem;
+		.right-panel {
 			min-height: 280px;
-			width: 100%;
-		}
-
-		.mode-badge {
-			padding: 0.5rem 1rem;
-		}
-
-		.mode-bullets {
-			font-size: 1rem;
-		}
-
-		.mode-odds {
-			font-size: 0.75rem;
 		}
 	}
 
@@ -252,21 +243,14 @@
 			padding: 0.5rem;
 		}
 
-		.game-scene {
-			padding: 1rem;
-			min-height: 240px;
-			border-radius: 12px;
-		}
-
-		.center-panel {
-			gap: 1rem;
+		.right-panel {
+			min-height: 260px;
 		}
 	}
 
 	@media (max-width: 360px) and (min-height: 500px) {
-		.game-scene {
-			min-height: 200px;
-			padding: 0.75rem;
+		.right-panel {
+			min-height: 220px;
 		}
 	}
 </style>

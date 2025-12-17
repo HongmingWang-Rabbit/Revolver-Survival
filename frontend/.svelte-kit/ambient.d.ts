@@ -45,6 +45,7 @@ declare module '$env/static/private' {
 	export const ORIGINAL_XDG_CURRENT_DESKTOP: string;
 	export const CURSOR_TRACE_ID: string;
 	export const ZDOTDIR: string;
+	export const VIPSHOME: string;
 	export const npm_config_save_package_manager: string;
 	export const npm_config_registry: string;
 	export const npm_config_fetch_retries: string;
@@ -148,6 +149,7 @@ declare module '$env/dynamic/private' {
 		ORIGINAL_XDG_CURRENT_DESKTOP: string;
 		CURSOR_TRACE_ID: string;
 		ZDOTDIR: string;
+		VIPSHOME: string;
 		npm_config_save_package_manager: string;
 		npm_config_registry: string;
 		npm_config_fetch_retries: string;

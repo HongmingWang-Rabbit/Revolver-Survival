@@ -22,12 +22,17 @@ export interface SpineConfig {
 	skeletonPath: string;
 	/** Default mix duration for animation transitions (seconds) */
 	defaultMixDuration: number;
-	/** Character scale factor */
+	/** Character scale factor at base dimensions */
 	scale: number;
-	/** Canvas dimensions */
+	/** Base canvas dimensions for scaling calculations */
 	canvas: {
 		width: number;
 		height: number;
+	};
+	/** Character positioning within canvas */
+	position: {
+		/** Vertical offset from center (0 = centered, positive = lower) */
+		verticalOffset: number;
 	};
 	/** Animation name mappings for game states */
 	animations: {
@@ -52,10 +57,14 @@ export const spineConfig: SpineConfig = {
 	atlasPath: '/spine/demo.atlas',
 	skeletonPath: '/spine/demo.json',
 	defaultMixDuration: 0.3,
-	scale: 0.35,
+	scale: 0.5,
 	canvas: {
-		width: 300,
-		height: 400,
+		width: 400,
+		height: 520,
+	},
+	position: {
+		// Character anchor is at feet, so offset down from center
+		verticalOffset: 0.25,
 	},
 	animations: {
 		idle: 'A1',

@@ -51,15 +51,24 @@ All game state lives in Svelte stores (`src/lib/stores/gameStore.ts`):
 
 Game state flow: `idle` → `betting` → `spinning` → `result` → (`continue` → `spinning` → ...) → `idle`
 
+### Auto Bet Feature
+
+Auto bet allows players to automate multiple rounds with configurable settings:
+- `autoBetConfig` store tracks running state, progress, wins/losses, and profit
+- Settings: Number of bets, Stop after X wins, Continue shots before cash out
+- Configuration in `gameConfig.autoBet` (default bets, max bets, max continue shots)
+- Timing in `gameConfig.timing` (autoBetSpinDelay, autoBetRoundDelay)
+
 ### Configuration Files
 
 - `frontend/src/lib/config/game.ts` - Demo settings, timing values, bet limits, sound mappings
-- `frontend/src/lib/config/spine.ts` - Spine animation name mappings (A1-A4, B1-B3)
+- `frontend/src/lib/config/spine.ts` - Spine animation mappings, scale, canvas dimensions, positioning
+- `frontend/src/app.css` - CSS custom properties (colors, fonts) - theme configuration
 - `math/games/revolver_survival/config.py` - House edge, chamber count, multiplier formulas
 
 ### Key Integrations
 
-**Spine Animations**: Character states map to animation names (A1=idle, A2=betting, B1-B3=spinning, etc.). Update `spine.ts` when changing Spine files.
+**Spine Animations**: Character states map to animation names (A1=idle, A2=betting, B1-B3=spinning, etc.). The character is dynamically sized based on container dimensions. Update `spine.ts` when changing Spine files or adjusting character size/position.
 
 **Sound Effects** (`src/lib/utils/sounds.ts`): Web Audio API-based sound manager. Sound files are in `static/sounds/`. Configuration in `game.ts` under `sounds` section maps sound names to files:
 
@@ -77,6 +86,16 @@ Game state flow: `idle` → `betting` → `spinning` → `result` → (`continue
 To replace sounds, update files in `static/sounds/` and modify `gameConfig.sounds.files` in `game.ts`.
 
 **RGS API** (`src/lib/services/rgs.ts`): Monetary values use 6 decimal precision (1,000,000 = $1.00). Endpoints: `/wallet/authenticate`, `/wallet/balance`, `/wallet/play`, `/wallet/end-round`.
+
+**Theme Configuration** (`src/app.css`): CSS custom properties define the visual theme:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `--color-bg` | Main background | #0d1b2a (dark navy) |
+| `--color-accent` | Primary action color | #00c853 (green) |
+| `--color-panel` | Panel background | rgba(20, 40, 60, 0.95) |
+| `--color-danger` | Error/death color | #ff4444 (red) |
+| `--font-primary` | Main font stack | System fonts |
 
 ## Game Math
 

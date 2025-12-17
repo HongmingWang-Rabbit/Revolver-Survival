@@ -82,7 +82,7 @@
 	}
 
 	.error-content h2 {
-		color: var(--color-accent);
+		color: var(--color-danger);
 		margin-bottom: 0.5rem;
 	}
 
