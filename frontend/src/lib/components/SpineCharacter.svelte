@@ -3,7 +3,7 @@
 	import { isSpinning, roundState, showResult } from '$lib/stores/gameStore';
 	import { Application, Assets } from 'pixi.js';
 	import { Spine } from '@esotericsoftware/spine-pixi-v8';
-	import { spineConfig } from '$lib/config/spine';
+	import { spineConfig, getSpinningAnimation, getWinAnimation } from '$lib/config/spine';
 
 	let container: HTMLDivElement;
 	let app: Application | null = null;
@@ -16,24 +16,54 @@
 	$: result = $roundState.lastResult;
 	$: showingResult = $showResult;
 	$: gameState = $roundState.gameState;
+	$: spinCount = $roundState.spinCount;
 
 	$: survived = (result?.payoutMultiplier || 0) > 0;
-	$: targetAnimation = getTargetAnimation(showingResult, survived, spinning, gameState);
+	$: targetAnimation = getTargetAnimation(showingResult, survived, spinning, gameState, spinCount);
 
 	$: if (spine && targetAnimation !== currentAnimation) {
 		playAnimation(targetAnimation);
 	}
 
+	/**
+	 * Determine the correct animation based on game state and spin count
+	 *
+	 * Animation flow:
+	 * - A1: Default idle
+	 * - A2: Loading bullets (betting state)
+	 * - B1/B2/B3_2: Aiming (based on spin count)
+	 * - A3/A4: Survival idle (based on survival count)
+	 * - B3_1: Death (gun fires)
+	 */
 	function getTargetAnimation(
 		showingResult: boolean,
 		survived: boolean,
 		spinning: boolean,
-		gameState: string
+		gameState: string,
+		spinCount: number
 	): string {
-		if (showingResult && !survived) return animations.death;
-		if (showingResult && survived) return animations.win;
-		if (spinning) return animations.spinning;
-		if (gameState === 'betting' || gameState === 'continue') return animations.betting;
+		// Death - always B3_1
+		if (showingResult && !survived) {
+			return animations.death;
+		}
+
+		// Survived - use appropriate survival idle (A3 or A4)
+		if (showingResult && survived) {
+			// spinCount represents how many times we've spun, which equals survival count when showing result
+			return getWinAnimation(spinCount);
+		}
+
+		// Currently spinning/aiming - use appropriate aiming animation (B1, B2, or B3_2)
+		if (spinning) {
+			return getSpinningAnimation(spinCount);
+		}
+
+		// Betting state - loading bullets animation
+		if (gameState === 'betting' || gameState === 'continue') {
+			return animations.betting;
+		}
+
+		// Default idle
 		return animations.idle;
 	}
 
@@ -81,8 +111,8 @@
 
 			app.stage.addChild(spine);
 			playAnimation(animations.idle);
-		} catch (error) {
-			console.error('Failed to initialize Spine:', error);
+		} catch {
+			// Spine initialization failed - character won't be visible
 		}
 	});
 
@@ -152,7 +182,7 @@
 		animation: blink 0.3s infinite;
 	}
 	.status-msg .ready {
-		color: #3498db;
+		color: var(--color-info);
 	}
 	.status-msg .idle {
 		color: var(--color-text-muted);

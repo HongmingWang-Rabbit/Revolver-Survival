@@ -24,8 +24,9 @@ class SoundManager {
 			// In production, load actual sound files
 			// For now, we'll generate simple tones
 			await this.generateSounds();
-		} catch (e) {
-			console.warn('Audio not available:', e);
+		} catch {
+			// Audio not available - sounds will be disabled
+			this.enabled = false;
 		}
 	}
 
@@ -159,8 +160,8 @@ class SoundManager {
 			source.buffer = buffer;
 			source.connect(this.audioContext.destination);
 			source.start();
-		} catch (e) {
-			console.warn('Failed to play sound:', e);
+		} catch {
+			// Silent fail - sound playback is non-critical
 		}
 	}
 

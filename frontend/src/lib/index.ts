@@ -11,8 +11,10 @@ export { default as StickMan } from './components/StickMan.svelte';
 export { default as SpineCharacter } from './components/SpineCharacter.svelte';
 
 // Config
-export { spineConfig } from './config/spine';
+export { spineConfig, getSpinningAnimation, getWinAnimation } from './config/spine';
 export type { SpineConfig } from './config/spine';
+export { gameConfig } from './config/game';
+export type { GameConfig } from './config/game';
 
 // Stores
 export * from './stores/gameStore';

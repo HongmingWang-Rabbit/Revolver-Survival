@@ -4,6 +4,7 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { rgsClient, fromRGSAmount, RGSError } from '$lib/services/rgs';
+import { gameConfig } from '$lib/config/game';
 import type {
 	GameMode,
 	GameState,
@@ -20,8 +21,8 @@ export type { GameMode, GameState, PlayResponse, RoundState, RGSConfig };
 // Game Configuration Constants
 // ============================================
 
-export const CHAMBERS = 6;
-export const HOUSE_EDGE = 0.0233;
+export const CHAMBERS = gameConfig.chambers;
+export const HOUSE_EDGE = gameConfig.houseEdge;
 
 // Pre-calculated game modes (match the math engine)
 // Note: Mode 2 uses 1.46x (floor) instead of 1.47x (round) to keep RTP variation within 0.5%
@@ -41,19 +42,14 @@ const DEMO_CONFIG: RGSConfig = {
 	initialized: true,
 	loading: false,
 	error: null,
-	minBet: 0.01,
-	maxBet: 1000,
+	minBet: gameConfig.demo.betLevels[0],
+	maxBet: gameConfig.demo.betLevels[gameConfig.demo.betLevels.length - 1],
 	stepBet: 0.01,
-	defaultBet: 1.00,
-	betLevels: [
-		{ amount: 0.10 },
-		{ amount: 0.50 },
-		{ amount: 1.00, default: true },
-		{ amount: 5.00 },
-		{ amount: 10.00 },
-		{ amount: 50.00 },
-		{ amount: 100.00 }
-	],
+	defaultBet: gameConfig.demo.defaultBet,
+	betLevels: gameConfig.demo.betLevels.map((amount, index) => ({
+		amount,
+		default: amount === gameConfig.demo.defaultBet
+	})),
 	currency: 'USD',
 	isDemo: true
 };
@@ -65,6 +61,7 @@ const initialRoundState: RoundState = {
 	currentPot: 0,
 	lastResult: null,
 	roundHistory: [],
+	spinCount: 0,
 };
 
 const initialRGSConfig: RGSConfig = {
@@ -139,7 +136,7 @@ export async function initializeRGS(): Promise<boolean> {
 	if (!hasRGS) {
 		// No RGS params - use demo mode
 		rgsConfig.set(DEMO_CONFIG);
-		balance.set(100.00);
+		balance.set(gameConfig.demo.startingBalance);
 		roundState.update(s => ({ ...s, betAmount: DEMO_CONFIG.defaultBet }));
 		return true;
 	}
@@ -179,8 +176,8 @@ export async function initializeRGS(): Promise<boolean> {
 			try {
 				const endResponse = await rgsClient.endRound(auth.round.roundID);
 				balance.set(fromRGSAmount(endResponse.balance.amount));
-			} catch (error) {
-				console.warn('RGS: Failed to end active round', error);
+			} catch {
+				// Silent fail - active round cleanup is best-effort
 			}
 		}
 
@@ -199,7 +196,7 @@ export async function initializeRGS(): Promise<boolean> {
 
 		// Fall back to demo mode on error
 		rgsConfig.set({ ...DEMO_CONFIG, error: errorMessage });
-		balance.set(100.00);
+		balance.set(gameConfig.demo.startingBalance);
 		roundState.update(s => ({ ...s, betAmount: DEMO_CONFIG.defaultBet }));
 
 		return false;
@@ -269,14 +266,14 @@ export async function spin(): Promise<PlayResponse | null> {
 	const config = get(rgsConfig);
 
 	isSpinning.set(true);
-	roundState.update(s => ({ ...s, gameState: 'spinning' }));
+	roundState.update(s => ({ ...s, gameState: 'spinning', spinCount: s.spinCount + 1 }));
 
 	try {
 		let result: PlayResponse;
 
 		if (config.isDemo) {
 			// Demo mode - simulate locally
-			await new Promise(resolve => setTimeout(resolve, 1500));
+			await new Promise(resolve => setTimeout(resolve, gameConfig.timing.spinDuration));
 
 			const random = Math.random();
 			const survived = random < mode.survivalRate;
@@ -359,12 +356,11 @@ export async function spin(): Promise<PlayResponse | null> {
 		if (!survived) {
 			setTimeout(() => {
 				resetRound();
-			}, 3000);
+			}, gameConfig.timing.deathResetDelay);
 		}
 
 		return result;
 	} catch (error) {
-		console.error('Spin error:', error);
 		isSpinning.set(false);
 
 		if (!config.isDemo && state.gameState !== 'continue') {
@@ -396,7 +392,6 @@ export async function cashOut(): Promise<boolean> {
 		resetRound();
 		return true;
 	} catch (error) {
-		console.error('Cash out error:', error);
 		resetRound();
 		throw error;
 	}
@@ -419,7 +414,7 @@ export async function refreshBalance(): Promise<void> {
 	try {
 		const balanceResponse = await rgsClient.getBalance();
 		balance.set(fromRGSAmount(balanceResponse.amount));
-	} catch (error) {
-		console.error('Failed to refresh balance:', error);
+	} catch {
+		// Silent fail - balance will sync on next successful operation
 	}
 }

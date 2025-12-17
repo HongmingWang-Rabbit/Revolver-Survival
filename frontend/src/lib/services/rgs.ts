@@ -40,7 +40,7 @@ export function getRGSConfig(): RGSClientConfig | null {
 	const currency = params.get('currency') || 'USD';
 
 	if (!sessionID || !rgsUrl) {
-		console.warn('RGS: Missing required URL parameters (sessionID, rgs_url)');
+		// Missing RGS params - will fall back to demo mode
 		return null;
 	}
 

@@ -76,6 +76,8 @@ export interface RoundState {
 	lastResult: PlayResponse | null;
 	roundHistory: PlayResponse[];
 	currentRoundId?: string;
+	/** Number of spins in current round (for animation selection) */
+	spinCount: number;
 }
 
 // ============================================

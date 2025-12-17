@@ -529,7 +529,7 @@
 	.status-msg .dead { color: var(--color-accent); text-shadow: 0 0 20px var(--color-accent); }
 	.status-msg .alive { color: var(--color-success); text-shadow: 0 0 20px var(--color-success); }
 	.status-msg .aiming { color: var(--color-warning); animation: blink 0.3s infinite; }
-	.status-msg .ready { color: #3498db; }
+	.status-msg .ready { color: var(--color-info); }
 	.status-msg .idle { color: var(--color-text-muted); }
 
 	@keyframes blink {

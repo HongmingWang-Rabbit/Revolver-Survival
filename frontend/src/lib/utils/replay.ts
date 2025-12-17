@@ -50,8 +50,8 @@ export function parseReplayParams(): ReplayConfig | null {
 	if (eventsParam) {
 		try {
 			events = JSON.parse(atob(eventsParam));
-		} catch (e) {
-			console.warn('Failed to parse replay events:', e);
+		} catch {
+			// Invalid events data - will use empty array
 		}
 	}
 
