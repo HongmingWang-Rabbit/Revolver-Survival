@@ -37,6 +37,6 @@ declare module "$app/types" {
 		};
 		Pathname(): "/" | `/${string}` & {} | `/${string}/` & {};
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
-		Asset(): "/favicon.png" | "/spine/demo.atlas" | "/spine/demo.json" | "/spine/demo.png" | "/sw.js" | string & {};
+		Asset(): "/favicon.png" | "/sounds/Failed.mp3" | "/sounds/Reload.mp3" | "/sounds/ShootFailed.mp3" | "/sounds/ShootLoad.mp3" | "/sounds/Shooting.mp3" | "/sounds/Tap.mp3" | "/sounds/WinA.mp3" | "/sounds/WinB.mp3" | "/spine/demo.atlas" | "/spine/demo.json" | "/spine/demo.png" | "/sw.js" | string & {};
 	}
 }

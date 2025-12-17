@@ -43,7 +43,7 @@ Revolver-Survival/
 │   │   │   │   ├── SpineCharacter.svelte  # Spine animation
 │   │   │   │   └── StickMan.svelte        # CSS fallback character
 │   │   │   ├── config/            # Configuration files
-│   │   │   │   ├── game.ts        # Game timing and demo settings
+│   │   │   │   ├── game.ts        # Game timing, sounds, demo settings
 │   │   │   │   └── spine.ts       # Spine animation mappings
 │   │   │   ├── services/
 │   │   │   │   └── rgs.ts         # RGS API client
@@ -53,11 +53,12 @@ Revolver-Survival/
 │   │   │   │   ├── currency.ts    # Currency formatting
 │   │   │   │   ├── replay.ts      # Replay mode support
 │   │   │   │   ├── socialMode.ts  # Social casino compliance
-│   │   │   │   └── sounds.ts      # Web Audio sound effects
+│   │   │   │   └── sounds.ts      # Web Audio sound manager
 │   │   │   ├── types.ts           # TypeScript definitions
 │   │   │   └── index.ts           # Library exports
 │   │   └── routes/                # SvelteKit pages
 │   ├── static/
+│   │   ├── sounds/                # Sound effect MP3 files
 │   │   └── spine/                 # Spine animation assets
 │   ├── package.json
 │   └── svelte.config.js
@@ -94,8 +95,24 @@ pnpm build    # Build for production
 
 Centralized configuration for:
 - **Demo mode**: Starting balance, bet levels
-- **Timing**: Spin duration, death reset delay
+- **Timing**: Spin duration, death reset delay, sound delays
 - **Game constants**: Chambers, house edge
+- **Sound mappings**: Sound names to file paths
+
+### Sound Effects (`frontend/static/sounds/`)
+
+| Sound | File | Trigger |
+|-------|------|---------|
+| click | Tap.mp3 | UI button clicks |
+| bet | Tap.mp3 | Bet placed |
+| spin | Reload.mp3 | Cylinder spinning |
+| empty | ShootFailed.mp3 | Survived (empty chamber) |
+| bang | Shooting.mp3 | Death (live round) |
+| win | WinA.mp3 | Win celebration |
+| cashout | WinB.mp3 | Cash out |
+| death | Failed.mp3 | Game over feedback |
+
+To replace sounds, update files in `static/sounds/` and modify `gameConfig.sounds.files` in `game.ts`.
 
 ### Spine Animation (`frontend/src/lib/config/spine.ts`)
 
@@ -202,7 +219,7 @@ A1 (idle) → A2 (load bullets) → B1 (1st aim) → A3 (survive) → B2 (2nd ai
 - **Frontend**: SvelteKit 2.x, TypeScript 5.x
 - **Rendering**: PixiJS 8.x
 - **Animation**: Spine 4.2 (spine-pixi-v8)
-- **Audio**: Web Audio API (procedural sounds)
+- **Audio**: Web Audio API with MP3 sound files
 - **Platform**: Stake Engine RGS
 
 ## Architecture

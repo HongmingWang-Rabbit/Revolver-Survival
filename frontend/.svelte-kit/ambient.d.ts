@@ -27,9 +27,11 @@
  */
 declare module '$env/static/private' {
 	export const NVM_INC: string;
+	export const NoDefaultCurrentDirectoryInExePath: string;
 	export const npm_config_legacy_peer_deps: string;
 	export const TERM_PROGRAM: string;
 	export const VSCODE_GIT_IPC_AUTH_TOKEN: string;
+	export const CLAUDE_CODE_ENTRYPOINT: string;
 	export const NODE: string;
 	export const NVM_CD_FLAGS: string;
 	export const INIT_CWD: string;
@@ -48,6 +50,7 @@ declare module '$env/static/private' {
 	export const npm_config_fetch_retries: string;
 	export const PNPM_HOME: string;
 	export const ENABLE_IDE_INTEGRATION: string;
+	export const GIT_EDITOR: string;
 	export const USER: string;
 	export const NVM_DIR: string;
 	export const COMMAND_MODE: string;
@@ -65,13 +68,16 @@ declare module '$env/static/private' {
 	export const USER_ZDOTDIR: string;
 	export const PWD: string;
 	export const npm_command: string;
+	export const OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: string;
 	export const npm_lifecycle_event: string;
 	export const LANG: string;
 	export const npm_package_name: string;
 	export const BUNDLED_DEBUGPY_PATH: string;
 	export const NODE_PATH: string;
+	export const npm_config_global: string;
 	export const XPC_FLAGS: string;
 	export const VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
+	export const npm_config_node_gyp: string;
 	export const XPC_SERVICE_NAME: string;
 	export const npm_package_version: string;
 	export const VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
@@ -83,12 +89,14 @@ declare module '$env/static/private' {
 	export const LOGNAME: string;
 	export const npm_lifecycle_script: string;
 	export const VSCODE_GIT_IPC_HANDLE: string;
+	export const COREPACK_ENABLE_AUTO_PIN: string;
 	export const NVM_BIN: string;
 	export const npm_config_user_agent: string;
 	export const HOMEBREW_CELLAR: string;
 	export const INFOPATH: string;
 	export const GIT_ASKPASS: string;
 	export const VSCODE_GIT_ASKPASS_NODE: string;
+	export const CLAUDECODE: string;
 	export const COLORTERM: string;
 	export const npm_node_execpath: string;
 	export const NODE_ENV: string;
@@ -122,9 +130,11 @@ declare module '$env/static/public' {
 declare module '$env/dynamic/private' {
 	export const env: {
 		NVM_INC: string;
+		NoDefaultCurrentDirectoryInExePath: string;
 		npm_config_legacy_peer_deps: string;
 		TERM_PROGRAM: string;
 		VSCODE_GIT_IPC_AUTH_TOKEN: string;
+		CLAUDE_CODE_ENTRYPOINT: string;
 		NODE: string;
 		NVM_CD_FLAGS: string;
 		INIT_CWD: string;
@@ -143,6 +153,7 @@ declare module '$env/dynamic/private' {
 		npm_config_fetch_retries: string;
 		PNPM_HOME: string;
 		ENABLE_IDE_INTEGRATION: string;
+		GIT_EDITOR: string;
 		USER: string;
 		NVM_DIR: string;
 		COMMAND_MODE: string;
@@ -160,13 +171,16 @@ declare module '$env/dynamic/private' {
 		USER_ZDOTDIR: string;
 		PWD: string;
 		npm_command: string;
+		OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: string;
 		npm_lifecycle_event: string;
 		LANG: string;
 		npm_package_name: string;
 		BUNDLED_DEBUGPY_PATH: string;
 		NODE_PATH: string;
+		npm_config_global: string;
 		XPC_FLAGS: string;
 		VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
+		npm_config_node_gyp: string;
 		XPC_SERVICE_NAME: string;
 		npm_package_version: string;
 		VSCODE_DEBUGPY_ADAPTER_ENDPOINTS: string;
@@ -178,12 +192,14 @@ declare module '$env/dynamic/private' {
 		LOGNAME: string;
 		npm_lifecycle_script: string;
 		VSCODE_GIT_IPC_HANDLE: string;
+		COREPACK_ENABLE_AUTO_PIN: string;
 		NVM_BIN: string;
 		npm_config_user_agent: string;
 		HOMEBREW_CELLAR: string;
 		INFOPATH: string;
 		GIT_ASKPASS: string;
 		VSCODE_GIT_ASKPASS_NODE: string;
+		CLAUDECODE: string;
 		COLORTERM: string;
 		npm_node_execpath: string;
 		NODE_ENV: string;

@@ -14,6 +14,7 @@
 	import { SFX } from '$lib/utils/sounds';
 	import { TEXT, isSocialMode } from '$lib/utils/socialMode';
 	import { getCurrencySymbol } from '$lib/utils/currency';
+	import { gameConfig } from '$lib/config/game';
 
 	// Compact mode for landscape popouts
 	let isCompact = false;
@@ -49,9 +50,10 @@
 		lastPlayedResultId = result.id;
 		if (result.payoutMultiplier > 0) {
 			SFX.play('empty');
-			setTimeout(() => SFX.play('win'), 100);
+			setTimeout(() => SFX.play('win'), gameConfig.timing.winSoundDelay);
 		} else {
 			SFX.play('bang');
+			setTimeout(() => SFX.play('death'), gameConfig.timing.deathSoundDelay);
 		}
 	}
 

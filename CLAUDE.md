@@ -53,13 +53,28 @@ Game state flow: `idle` → `betting` → `spinning` → `result` → (`continue
 
 ### Configuration Files
 
-- `frontend/src/lib/config/game.ts` - Demo settings, timing values, bet limits
+- `frontend/src/lib/config/game.ts` - Demo settings, timing values, bet limits, sound mappings
 - `frontend/src/lib/config/spine.ts` - Spine animation name mappings (A1-A4, B1-B3)
 - `math/games/revolver_survival/config.py` - House edge, chamber count, multiplier formulas
 
 ### Key Integrations
 
 **Spine Animations**: Character states map to animation names (A1=idle, A2=betting, B1-B3=spinning, etc.). Update `spine.ts` when changing Spine files.
+
+**Sound Effects** (`src/lib/utils/sounds.ts`): Web Audio API-based sound manager. Sound files are in `static/sounds/`. Configuration in `game.ts` under `sounds` section maps sound names to files:
+
+| Sound Name | File | Trigger |
+|------------|------|---------|
+| click | Tap.mp3 | UI interactions |
+| bet | Tap.mp3 | Bet placed |
+| spin | Reload.mp3 | Cylinder spin |
+| empty | ShootFailed.mp3 | Survived (empty chamber) |
+| bang | Shooting.mp3 | Death (live round) |
+| win | WinA.mp3 | Win celebration |
+| cashout | WinB.mp3 | Cash out |
+| death | Failed.mp3 | Game over feedback |
+
+To replace sounds, update files in `static/sounds/` and modify `gameConfig.sounds.files` in `game.ts`.
 
 **RGS API** (`src/lib/services/rgs.ts`): Monetary values use 6 decimal precision (1,000,000 = $1.00). Endpoints: `/wallet/authenticate`, `/wallet/balance`, `/wallet/play`, `/wallet/end-round`.
 

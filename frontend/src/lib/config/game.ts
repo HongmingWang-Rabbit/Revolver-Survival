@@ -5,6 +5,9 @@
  * Modify values here instead of hardcoding throughout the codebase.
  */
 
+/** Sound effect identifiers */
+export type SoundName = 'click' | 'spin' | 'empty' | 'bang' | 'win' | 'cashout' | 'bet' | 'death';
+
 export interface GameConfig {
 	/** Number of chambers in the revolver */
 	chambers: number;
@@ -29,6 +32,17 @@ export interface GameConfig {
 		deathResetDelay: number;
 		/** Result display duration */
 		resultDisplayDuration: number;
+		/** Delay before win sound after empty chamber */
+		winSoundDelay: number;
+		/** Delay before death sound after gunshot */
+		deathSoundDelay: number;
+	};
+	/** Sound configuration */
+	sounds: {
+		/** Base path for sound files */
+		basePath: string;
+		/** Sound file mappings */
+		files: Record<SoundName, string>;
 	};
 }
 
@@ -51,6 +65,21 @@ export const gameConfig: GameConfig = {
 		spinDuration: 1500,
 		deathResetDelay: 3000,
 		resultDisplayDuration: 2000,
+		winSoundDelay: 100,
+		deathSoundDelay: 300,
+	},
+	sounds: {
+		basePath: 'sounds',
+		files: {
+			click: 'Tap.mp3',
+			bet: 'Tap.mp3',
+			spin: 'Reload.mp3',
+			empty: 'ShootFailed.mp3',
+			bang: 'Shooting.mp3',
+			win: 'WinA.mp3',
+			cashout: 'WinB.mp3',
+			death: 'Failed.mp3',
+		},
 	},
 };
 
