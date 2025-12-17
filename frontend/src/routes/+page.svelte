@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Header, BetControls, GameActions, StickMan, GameDisclaimer } from '$lib';
+	import { Header, BetControls, GameActions, SpineCharacter, GameDisclaimer } from '$lib';
 	import { roundState, GAME_MODES, placeBet, spin, canPlaceBet, canSpin, isSpinning } from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
 
@@ -42,7 +42,7 @@
 			<!-- Center: Game Scene -->
 			<section class="center-panel">
 				<div class="game-scene">
-					<StickMan />
+					<SpineCharacter />
 				</div>
 
 				{#if selectedMode}

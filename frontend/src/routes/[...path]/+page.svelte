@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Header, BetControls, GameActions, StickMan, GameDisclaimer } from '$lib';
+	import { Header, BetControls, GameActions, SpineCharacter, GameDisclaimer } from '$lib';
 	import { roundState, GAME_MODES } from '$lib/stores/gameStore';
 
 	$: selectedMode = GAME_MODES.find(m => m.bullets === $roundState.selectedBullets);
@@ -24,7 +24,7 @@
 			<!-- Center: Game Scene -->
 			<section class="center-panel">
 				<div class="game-scene">
-					<StickMan />
+					<SpineCharacter />
 				</div>
 
 				{#if selectedMode}

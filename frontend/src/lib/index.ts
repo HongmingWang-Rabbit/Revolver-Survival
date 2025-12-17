@@ -8,6 +8,11 @@ export { default as GameActions } from './components/GameActions.svelte';
 export { default as GameDisclaimer } from './components/GameDisclaimer.svelte';
 export { default as Header } from './components/Header.svelte';
 export { default as StickMan } from './components/StickMan.svelte';
+export { default as SpineCharacter } from './components/SpineCharacter.svelte';
+
+// Config
+export { spineConfig } from './config/spine';
+export type { SpineConfig } from './config/spine';
 
 // Stores
 export * from './stores/gameStore';

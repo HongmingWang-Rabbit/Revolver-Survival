@@ -36,12 +36,25 @@ Revolver-Survival/
 │   ├── src/
 │   │   ├── lib/
 │   │   │   ├── components/        # UI components
+│   │   │   │   ├── SpineCharacter.svelte  # Spine animation character
+│   │   │   │   └── StickMan.svelte        # Fallback CSS character
+│   │   │   ├── config/            # Configuration files
+│   │   │   │   └── spine.ts       # Spine animation config
 │   │   │   ├── stores/            # Game state management
 │   │   │   ├── utils/             # RGS client, sounds
 │   │   │   └── types.ts           # TypeScript types
 │   │   └── routes/                # SvelteKit pages
+│   ├── static/
+│   │   └── spine/                 # Spine animation assets
+│   │       ├── demo.atlas
+│   │       ├── demo.json
+│   │       └── demo.png
 │   ├── package.json
 │   └── svelte.config.js
+│
+├── assets/                        # Source assets (not deployed)
+│   ├── 音效/                      # Sound effect source files
+│   └── 番剧spine源文件/           # Spine source files
 │
 └── instruction.md                 # Game design document
 ```
@@ -108,8 +121,29 @@ When deployed to Stake Engine, the game receives:
 ## Technologies
 
 - **Math Engine**: Python 3.11+, zstandard compression
-- **Frontend**: SvelteKit 2.x, TypeScript, CSS
+- **Frontend**: SvelteKit 2.x, TypeScript, PixiJS 8.x
+- **Animation**: Spine 4.2 (spine-pixi-v8)
 - **Platform**: Stake Engine RGS
+
+## Character Animation
+
+The game uses Spine for character animation. Configuration is in `frontend/src/lib/config/spine.ts`.
+
+### Animation Mappings
+
+| Game State | Animation |
+|------------|-----------|
+| Idle       | A1        |
+| Betting    | A2        |
+| Spinning   | A3        |
+| Win        | B1        |
+| Death      | B3_1      |
+
+### Updating Animations
+
+1. Export new Spine files to `frontend/static/spine/`
+2. Update animation names in `frontend/src/lib/config/spine.ts`
+3. For smooth transitions, ensure animations have keyframed bones at frame 0
 
 ## License
 
