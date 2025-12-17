@@ -12,6 +12,7 @@
 	} from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
 	import { TEXT, isSocialMode } from '$lib/utils/socialMode';
+	import { getCurrencySymbol, formatBetAmount } from '$lib/utils/currency';
 
 	// Mobile detection for hiding when game active (only portrait mobile, not landscape)
 	let isMobilePortrait = false;
@@ -33,15 +34,6 @@
 	const betAmountText = TEXT.betAmount;
 	const placeBetBtnText = TEXT.placeBetBtn;
 	const betPlacedText = TEXT.betPlaced;
-
-	// Currency display
-	function getCurrencySymbol(currency: string): string {
-		const symbols: Record<string, string> = {
-			USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥',
-			KRW: '₩', INR: '₹', BRL: 'R$', CAD: 'C$', AUD: 'A$'
-		};
-		return symbols[currency] || currency + ' ';
-	}
 
 	$: currencySymbol = $isSocialMode ? '' : getCurrencySymbol($rgsConfig.currency);
 
@@ -89,17 +81,6 @@
 			placeBet();
 			SFX.play('bet');
 		}
-	}
-
-	// Format bet amount for display
-	function formatBetAmount(amount: number): string {
-		if (amount >= 1000) {
-			return `${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}K`;
-		}
-		if (amount >= 1) {
-			return amount % 1 === 0 ? amount.toFixed(0) : amount.toFixed(2);
-		}
-		return amount.toFixed(2);
 	}
 
 	// Get mode info for selected bullets

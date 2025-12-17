@@ -2,6 +2,7 @@
 	import { balance, rgsConfig } from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
 	import { isSocialMode } from '$lib/utils/socialMode';
+	import { getCurrencySymbol } from '$lib/utils/currency';
 
 	let soundEnabled = true;
 
@@ -9,17 +10,7 @@
 		soundEnabled = SFX.toggle();
 	}
 
-	// Get currency symbol or abbreviation
-	function getCurrencyDisplay(currency: string): string {
-		const symbols: Record<string, string> = {
-			USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥',
-			KRW: '₩', INR: '₹', BRL: 'R$', CAD: 'C$', AUD: 'A$'
-		};
-		return symbols[currency] || currency + ' ';
-	}
-
-	$: currency = $rgsConfig.currency;
-	$: currencySymbol = $isSocialMode ? '' : getCurrencyDisplay(currency);
+	$: currencySymbol = $isSocialMode ? '' : getCurrencySymbol($rgsConfig.currency);
 </script>
 
 <header class="header">

@@ -108,7 +108,7 @@
 		align-items: center;
 		justify-content: center;
 		padding: 2rem;
-		background: radial-gradient(circle at 50% 40%, #2d3436 0%, var(--color-bg) 70%);
+		background: radial-gradient(circle at 50% 40%, var(--color-bg-highlight) 0%, var(--color-bg) 70%);
 		border-radius: 20px;
 		min-height: 350px;
 	}

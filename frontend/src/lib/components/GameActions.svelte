@@ -13,6 +13,7 @@
 	} from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
 	import { TEXT, isSocialMode } from '$lib/utils/socialMode';
+	import { getCurrencySymbol } from '$lib/utils/currency';
 
 	// Compact mode for landscape popouts
 	let isCompact = false;
@@ -26,15 +27,6 @@
 	// Social text stores
 	const betAmountText = TEXT.betAmount;
 	const cashOutText = TEXT.cashOut;
-
-	// Currency display
-	function getCurrencySymbol(currency: string): string {
-		const symbols: Record<string, string> = {
-			USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥',
-			KRW: '₩', INR: '₹', BRL: 'R$', CAD: 'C$', AUD: 'A$'
-		};
-		return symbols[currency] || currency + ' ';
-	}
 
 	$: currencySymbol = $isSocialMode ? '' : getCurrencySymbol($rgsConfig.currency);
 

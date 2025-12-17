@@ -41,7 +41,11 @@ Revolver-Survival/
 │   │   │   ├── config/            # Configuration files
 │   │   │   │   └── spine.ts       # Spine animation config
 │   │   │   ├── stores/            # Game state management
-│   │   │   ├── utils/             # RGS client, sounds
+│   │   │   ├── utils/             # RGS client, sounds, currency
+│   │   │   │   ├── currency.ts    # Currency formatting utilities
+│   │   │   │   ├── sounds.ts      # Sound effects (Web Audio)
+│   │   │   │   ├── socialMode.ts  # Social mode text mappings
+│   │   │   │   └── replay.ts      # Replay mode support
 │   │   │   └── types.ts           # TypeScript types
 │   │   └── routes/                # SvelteKit pages
 │   ├── static/
@@ -144,6 +148,12 @@ The game uses Spine for character animation. Configuration is in `frontend/src/l
 1. Export new Spine files to `frontend/static/spine/`
 2. Update animation names in `frontend/src/lib/config/spine.ts`
 3. For smooth transitions, ensure animations have keyframed bones at frame 0
+
+## Currency Support
+
+The game supports multiple currencies with automatic symbol formatting. Supported currencies include USD, EUR, GBP, JPY, CNY, KRW, INR, BRL, CAD, and AUD. Unknown currencies display their code (e.g., "CHF 100.00").
+
+Currency is configured via the RGS response and automatically propagates throughout the UI.
 
 ## License
 

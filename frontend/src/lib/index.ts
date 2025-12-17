@@ -23,3 +23,4 @@ export * from './types';
 // Utils
 export { SFX } from './utils/sounds';
 export * from './utils/socialMode';
+export * from './utils/currency';
