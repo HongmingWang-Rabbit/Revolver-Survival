@@ -8,8 +8,10 @@
 export interface GameConfig {
 	/** Number of chambers in the revolver */
 	chambers: number;
-	/** House edge percentage (e.g., 0.0233 = 2.33%) */
+	/** House edge percentage (e.g., 0.04 = 4%) */
 	houseEdge: number;
+	/** Per-mode maximum bet limits */
+	modeBetLimits: Record<number, number>;
 	/** Demo mode settings */
 	demo: {
 		/** Starting balance in demo mode */
@@ -32,7 +34,14 @@ export interface GameConfig {
 
 export const gameConfig: GameConfig = {
 	chambers: 6,
-	houseEdge: 0.0233,
+	houseEdge: 0.04,
+	modeBetLimits: {
+		1: 1000,  // 1 bullet max bet
+		2: 1000,  // 2 bullets max bet
+		3: 1000,  // 3 bullets max bet
+		4: 500,   // 4 bullets max bet
+		5: 200,   // 5 bullets max bet
+	},
 	demo: {
 		startingBalance: 100.0,
 		defaultBet: 1.0,

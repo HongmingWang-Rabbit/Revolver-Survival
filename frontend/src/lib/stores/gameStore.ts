@@ -25,13 +25,13 @@ export const CHAMBERS = gameConfig.chambers;
 export const HOUSE_EDGE = gameConfig.houseEdge;
 
 // Pre-calculated game modes (match the math engine)
-// Note: Mode 2 uses 1.46x (floor) instead of 1.47x (round) to keep RTP variation within 0.5%
+// House edge: 4% | Multiplier = (1 - houseEdge) / (bullets / chambers)
 export const GAME_MODES: GameMode[] = [
-	{ name: 'mode_1_bullet', bullets: 1, survivalRate: 0.8333, multiplier: 1.17, displayName: '1 Bullet' },
-	{ name: 'mode_2_bullet', bullets: 2, survivalRate: 0.6667, multiplier: 1.46, displayName: '2 Bullets' },
-	{ name: 'mode_3_bullet', bullets: 3, survivalRate: 0.5000, multiplier: 1.95, displayName: '3 Bullets' },
-	{ name: 'mode_4_bullet', bullets: 4, survivalRate: 0.3333, multiplier: 2.93, displayName: '4 Bullets' },
-	{ name: 'mode_5_bullet', bullets: 5, survivalRate: 0.1667, multiplier: 5.86, displayName: '5 Bullets' },
+	{ name: 'mode_1_bullet', bullets: 1, survivalRate: 0.8333, multiplier: 1.152, maxBet: 1000, displayName: '1 Bullet' },
+	{ name: 'mode_2_bullet', bullets: 2, survivalRate: 0.6667, multiplier: 1.44, maxBet: 1000, displayName: '2 Bullets' },
+	{ name: 'mode_3_bullet', bullets: 3, survivalRate: 0.5000, multiplier: 1.92, maxBet: 1000, displayName: '3 Bullets' },
+	{ name: 'mode_4_bullet', bullets: 4, survivalRate: 0.3333, multiplier: 2.88, maxBet: 500, displayName: '4 Bullets' },
+	{ name: 'mode_5_bullet', bullets: 5, survivalRate: 0.1667, multiplier: 5.76, maxBet: 200, displayName: '5 Bullets' },
 ];
 
 // ============================================
@@ -97,12 +97,12 @@ export const currentMode = derived(
 );
 
 export const canPlaceBet = derived(
-	[balance, roundState, rgsConfig],
-	([$balance, $roundState, $rgsConfig]) =>
+	[balance, roundState, rgsConfig, currentMode],
+	([$balance, $roundState, $rgsConfig, $currentMode]) =>
 		$rgsConfig.initialized &&
 		$roundState.gameState === 'idle' &&
 		$roundState.betAmount >= $rgsConfig.minBet &&
-		$roundState.betAmount <= $rgsConfig.maxBet &&
+		$roundState.betAmount <= Math.min($rgsConfig.maxBet, $currentMode.maxBet) &&
 		$roundState.betAmount <= $balance
 );
 
@@ -123,6 +123,12 @@ export const potentialWin = derived(
 
 export const MIN_BET = derived(rgsConfig, ($config) => $config.minBet);
 export const MAX_BET = derived(rgsConfig, ($config) => $config.maxBet);
+
+/** Effective max bet considering mode-specific limits */
+export const effectiveMaxBet = derived(
+	[rgsConfig, currentMode],
+	([$config, $mode]) => Math.min($config.maxBet, $mode.maxBet)
+);
 
 // ============================================
 // Initialization

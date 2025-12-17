@@ -8,15 +8,15 @@ Players bet on surviving a round fired from a six-chamber revolver loaded with a
 
 ## Game Modes
 
-| Bullets | Survival Rate | Multiplier | RTP    |
-|---------|---------------|------------|--------|
-| 1       | 83.33%        | x1.17      | 97.50% |
-| 2       | 66.67%        | x1.46      | 97.33% |
-| 3       | 50.00%        | x1.95      | 97.50% |
-| 4       | 33.33%        | x2.93      | 97.67% |
-| 5       | 16.67%        | x5.86      | 97.67% |
+| Bullets | Survival Rate | Multiplier | Max Bet | RTP   |
+|---------|---------------|------------|---------|-------|
+| 1       | 83.33%        | x1.152     | 1000    | 96.0% |
+| 2       | 66.67%        | x1.44      | 1000    | 96.0% |
+| 3       | 50.00%        | x1.92      | 1000    | 96.0% |
+| 4       | 33.33%        | x2.88      | 500     | 96.0% |
+| 5       | 16.67%        | x5.76      | 200     | 96.0% |
 
-House edge: 2.33%
+House edge: 4%
 
 ## Project Structure
 
@@ -171,13 +171,24 @@ Automatic symbol formatting for: USD, EUR, GBP, JPY, CNY, KRW, INR, BRL, CAD, AU
 
 ### Animation Mappings
 
-| Game State | Animation | Description        |
-|------------|-----------|-------------------|
-| Idle       | A1        | Breathing idle    |
-| Betting    | A2        | Cylinder spinning |
-| Spinning   | A3        | Aiming at temple  |
-| Win        | B1        | Victory pose      |
-| Death      | B3_1      | Death animation   |
+| Animation | Game State           | Description                    |
+|-----------|---------------------|--------------------------------|
+| A1        | Idle                | Default breathing idle          |
+| A2        | Betting             | Loading bullets, spinning cylinder |
+| A3        | 1st Survival        | Idle after surviving first shot |
+| A4        | 2nd+ Survival       | Idle after surviving 2+ shots   |
+| B1        | 1st Spin            | First aiming at temple          |
+| B2        | 2nd Spin            | Second aiming                   |
+| B3_1      | Death               | Gun fires, death animation      |
+| B3_2      | 3rd+ Spin (survive) | Third+ aiming, click (empty)    |
+
+### Animation Flow
+
+```
+A1 (idle) → A2 (load bullets) → B1 (1st aim) → A3 (survive) → B2 (2nd aim) → A4 (survive) → B3_2 (3rd aim) → ...
+                                     ↓                              ↓                              ↓
+                                  B3_1 (death)                   B3_1 (death)                   B3_1 (death)
+```
 
 ### Updating Animations
 

@@ -13,6 +13,8 @@ export interface GameMode {
 	survivalRate: number;
 	multiplier: number;
 	displayName: string;
+	/** Maximum bet allowed for this mode */
+	maxBet: number;
 }
 
 export interface GameConfig {
