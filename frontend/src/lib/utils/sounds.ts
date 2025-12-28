@@ -7,6 +7,9 @@
 
 import { gameConfig, type SoundName } from '$lib/config/game';
 
+// Get base URL for assets - navigate up from _app/immutable/chunks/ to app root (3 levels)
+const baseUrl = new URL('../../../', /* @vite-ignore */ import.meta.url).href;
+
 class SoundManager {
 	private audioContext: AudioContext | null = null;
 	private sounds: Map<SoundName, AudioBuffer> = new Map();
@@ -35,9 +38,11 @@ class SoundManager {
 
 		const loadPromises = (Object.entries(files) as [SoundName, string][]).map(
 			async ([name, filename]) => {
-				const path = `${basePath}/${filename}`;
+				// Construct absolute URL based on script location
+				const relativePath = `${basePath}/${filename}`;
+				const absoluteUrl = new URL(relativePath, baseUrl).href;
 				try {
-					const response = await fetch(path);
+					const response = await fetch(absoluteUrl);
 					if (!response.ok) throw new Error(`HTTP ${response.status}`);
 					const arrayBuffer = await response.arrayBuffer();
 					const audioBuffer = await this.audioContext!.decodeAudioData(arrayBuffer);

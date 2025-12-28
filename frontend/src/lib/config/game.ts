@@ -106,7 +106,7 @@ export const gameConfig: GameConfig = {
     maxContinueShots: 10,
   },
   sounds: {
-    basePath: "sounds",
+    basePath: "./sounds",
     files: {
       click: "Tap.mp3",
       bet: "Tap.mp3",
