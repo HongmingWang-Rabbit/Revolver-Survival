@@ -78,21 +78,19 @@
 	.game-main {
 		flex: 1;
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 1rem 2rem 2rem;
+		align-items: stretch;
+		justify-content: stretch;
+		padding: 1rem;
 		min-height: 0;
 	}
 
 	.game-layout {
 		display: flex;
 		align-items: stretch;
-		justify-content: center;
-		gap: 2rem;
+		justify-content: stretch;
+		gap: 4px;
 		width: 100%;
-		max-width: 1000px;
 		height: 100%;
-		max-height: 600px;
 	}
 
 	.left-panel {
@@ -103,17 +101,19 @@
 
 	.right-panel {
 		flex: 1;
+		min-width: 0;
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		position: relative;
-		min-width: 300px;
+		background: var(--color-panel-game);
+		border-radius: 12px;
+		overflow: hidden;
 	}
 
 	.game-scene {
 		width: 100%;
 		height: 100%;
-		max-width: 500px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -152,35 +152,26 @@
 		font-variant-numeric: tabular-nums;
 	}
 
-	/* Responsive layout */
-	@media (max-width: 1200px) {
-		.game-layout {
-			gap: 1.5rem;
-		}
-	}
-
 	/* Portrait mobile and tablet - vertical stack */
 	@media (max-width: 1024px) and (min-height: 500px) {
 		.game-main {
-			padding: 1rem;
+			padding: 0.5rem;
 		}
 
 		.game-layout {
 			flex-direction: column;
-			gap: 1rem;
-			max-height: none;
 		}
 
 		.left-panel {
 			width: 100%;
 			max-width: 400px;
 			align-self: center;
+			flex-shrink: 0;
 		}
 
 		.right-panel {
 			flex: 1;
-			min-height: 300px;
-			max-height: 400px;
+			min-height: 200px;
 		}
 	}
 
@@ -188,22 +179,6 @@
 	@media (max-height: 500px) {
 		.game-main {
 			padding: 0.5rem;
-		}
-
-		.game-layout {
-			flex-direction: row;
-			gap: 1rem;
-			max-height: none;
-			height: 100%;
-		}
-
-		.left-panel {
-			width: auto;
-			max-width: none;
-		}
-
-		.right-panel {
-			flex: 1;
 		}
 
 		.multiplier-badges {
@@ -223,34 +198,14 @@
 			padding: 0.25rem;
 		}
 
-		.game-layout {
-			gap: 0.5rem;
-		}
-
 		.multiplier-badges {
 			display: none;
 		}
 	}
 
-	@media (max-width: 768px) and (min-height: 500px) {
-		.right-panel {
-			min-height: 280px;
-		}
-	}
-
 	@media (max-width: 480px) and (min-height: 500px) {
 		.game-main {
-			padding: 0.5rem;
-		}
-
-		.right-panel {
-			min-height: 260px;
-		}
-	}
-
-	@media (max-width: 360px) and (min-height: 500px) {
-		.right-panel {
-			min-height: 220px;
+			padding: 0.25rem;
 		}
 	}
 </style>

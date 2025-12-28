@@ -55,9 +55,15 @@ Game state flow: `idle` → `betting` → `spinning` → `result` → (`continue
 
 Auto bet allows players to automate multiple rounds with configurable settings:
 - `autoBetConfig` store tracks running state, progress, wins/losses, and profit
-- Settings: Number of bets, Stop after X wins, Continue shots before cash out
+- Basic settings: Number of bets, Stop after X wins, Continue shots before cash out
 - Configuration in `gameConfig.autoBet` (default bets, max bets, max continue shots)
 - Timing in `gameConfig.timing` (autoBetSpinDelay, autoBetRoundDelay)
+
+**Advanced Settings** (toggled via "Advanced" switch):
+- On Win: Reset bet to initial OR increase by X%
+- On Loss: Reset bet to initial OR increase by X% (Martingale)
+- Stop on Profit: Auto-stop when profit threshold reached
+- Stop on Loss: Auto-stop when loss threshold reached
 
 ### Configuration Files
 
@@ -101,10 +107,15 @@ To replace sounds, update files in `static/sounds/` and modify `gameConfig.sound
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `--color-bg` | Main background | #0d1b2a (dark navy) |
-| `--color-accent` | Primary action color | #00c853 (green) |
+| `--color-bg` | Main background | #0d1b2a |
+| `--color-accent` | Primary action color | #1bdc1b |
 | `--color-panel` | Panel background | rgba(20, 40, 60, 0.95) |
-| `--color-danger` | Error/death color | #ff4444 (red) |
+| `--color-panel-game` | Game panel background | #213743 |
+| `--color-panel-dark` | Dark panel/tab container | #0e1c24 |
+| `--color-panel-active` | Active tab background | #2a4a5a |
+| `--color-input-wrapper` | Input wrapper/payout bg | #2f4553 |
+| `--color-input` | Input field background | #0f212e |
+| `--color-danger` | Error/death color | #ff4444 |
 | `--font-primary` | Main font stack | System fonts |
 
 ## Game Math

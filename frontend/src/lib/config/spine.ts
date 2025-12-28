@@ -66,14 +66,13 @@ export const spineConfig: SpineConfig = {
 	atlasPath: '/spine/demo.atlas',
 	skeletonPath: '/spine/demo.json',
 	defaultMixDuration: 0.3,
-	scale: 0.5,
+	scale: 0.55,
 	canvas: {
-		width: 400,
-		height: 520,
+		width: 300,
+		height: 400,
 	},
 	position: {
-		// Character anchor is at feet, so offset down from center
-		verticalOffset: 0.25,
+		verticalOffset: 0.45,
 	},
 	rendering: {
 		minPixelRatio: 2,

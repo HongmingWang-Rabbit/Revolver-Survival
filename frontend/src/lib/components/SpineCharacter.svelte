@@ -220,10 +220,6 @@
 			<span class="alive">SURVIVED!</span>
 		{:else if spinning}
 			<span class="aiming">Aiming...</span>
-		{:else if gameState === 'betting' || gameState === 'continue'}
-			<span class="ready">Spinning cylinder...</span>
-		{:else}
-			<span class="idle">Ready</span>
 		{/if}
 	</div>
 </div>
@@ -271,12 +267,6 @@
 	.status-msg .aiming {
 		color: var(--color-warning);
 		animation: blink 0.3s infinite;
-	}
-	.status-msg .ready {
-		color: var(--color-info);
-	}
-	.status-msg .idle {
-		color: var(--color-text-muted);
 	}
 
 	@keyframes blink {

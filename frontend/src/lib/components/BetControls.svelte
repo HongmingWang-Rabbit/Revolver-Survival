@@ -37,6 +37,15 @@
 	let autoStopOnWin = 0;
 	let autoContinueShots = 0;
 
+	// Advanced settings
+	let showAdvanced = false;
+	let onWinMode: 'reset' | 'increase' = 'reset';
+	let onWinIncrease = 0;
+	let onLossMode: 'reset' | 'increase' = 'reset';
+	let onLossIncrease = 0;
+	let stopOnProfit = 0;
+	let stopOnLoss = 0;
+
 	// Mobile detection
 	let isMobilePortrait = false;
 	let isCompact = false;
@@ -162,8 +171,21 @@
 	}
 
 	async function executeAutoBetLoop() {
+		const initialBetAmount = $roundState.betAmount;
+
 		while (!shouldStopAutoBet()) {
 			try {
+				// Check advanced stop conditions
+				if (showAdvanced) {
+					const { profit } = $autoBetConfig;
+					if (stopOnProfit > 0 && profit >= stopOnProfit) {
+						break;
+					}
+					if (stopOnLoss > 0 && profit <= -stopOnLoss) {
+						break;
+					}
+				}
+
 				// Place bet (only if not continuing)
 				if ($roundState.gameState === 'idle') {
 					const betPlaced = await placeBet();
@@ -210,6 +232,16 @@
 						await cashOut();
 						resetContinueCount();
 
+						// Apply advanced on-win bet adjustment
+						if (showAdvanced) {
+							if (onWinMode === 'reset') {
+								setBetAmount(initialBetAmount);
+							} else if (onWinMode === 'increase' && onWinIncrease > 0) {
+								const newBet = betAmount * (1 + onWinIncrease / 100);
+								setBetAmount(Math.min(newBet, maxBet));
+							}
+						}
+
 						// Wait before next bet
 						await delay(gameConfig.timing.autoBetRoundDelay);
 					}
@@ -217,6 +249,16 @@
 					// Lost - update stats
 					updateAutoBetStats(false, 0, betAmount);
 					resetContinueCount();
+
+					// Apply advanced on-loss bet adjustment
+					if (showAdvanced) {
+						if (onLossMode === 'reset') {
+							setBetAmount(initialBetAmount);
+						} else if (onLossMode === 'increase' && onLossIncrease > 0) {
+							const newBet = betAmount * (1 + onLossIncrease / 100);
+							setBetAmount(Math.min(newBet, maxBet));
+						}
+					}
 
 					// Wait before next bet
 					await delay(gameConfig.timing.autoBetRoundDelay);
@@ -245,22 +287,24 @@
 <div class="control-panel" class:compact={isCompact} style={hideOnMobile ? 'display: none !important;' : ''}>
 	<!-- Tab Toggle -->
 	<div class="tab-toggle">
-		<button
-			class="tab-btn"
-			class:active={activeTab === 'manual'}
-			on:click={() => { activeTab = 'manual'; SFX.play('click'); }}
-			disabled={isAutoBetting}
-		>
-			Manual
-		</button>
-		<button
-			class="tab-btn"
-			class:active={activeTab === 'auto'}
-			on:click={() => { activeTab = 'auto'; SFX.play('click'); }}
-			disabled={isAutoBetting}
-		>
-			Auto
-		</button>
+		<div class="tab-container">
+			<button
+				class="tab-btn"
+				class:active={activeTab === 'manual'}
+				on:click={() => { activeTab = 'manual'; SFX.play('click'); }}
+				disabled={isAutoBetting}
+			>
+				手动投入
+			</button>
+			<button
+				class="tab-btn"
+				class:active={activeTab === 'auto'}
+				on:click={() => { activeTab = 'auto'; SFX.play('click'); }}
+				disabled={isAutoBetting}
+			>
+				自动投入
+			</button>
+		</div>
 	</div>
 
 	{#if activeTab === 'manual'}
@@ -272,20 +316,20 @@
 					<span>Bet Amount</span>
 					<span class="balance-value">{currencySymbol}{$balance.toFixed(2)}</span>
 				</div>
-				<div class="bet-input-row">
-					<div class="input-field">
-						<input
-							type="number"
-							bind:value={betInput}
-							on:change={handleBetInput}
-							min={minBet}
-							max={maxBet}
-							step="0.01"
-							disabled={gameState !== 'idle'}
-						/>
+				<div class="bet-input-group">
+					<input
+						type="number"
+						bind:value={betInput}
+						on:change={handleBetInput}
+						min={minBet}
+						max={maxBet}
+						step="0.01"
+						disabled={gameState !== 'idle'}
+					/>
+					<div class="adjust-buttons">
+						<button class="adjust-btn" on:click={() => adjustBet(0.5)} disabled={gameState !== 'idle'}>1/2</button>
+						<button class="adjust-btn" on:click={() => adjustBet(2)} disabled={gameState !== 'idle'}>2X</button>
 					</div>
-					<button class="adjust-btn" on:click={() => adjustBet(0.5)} disabled={gameState !== 'idle'}>1/2</button>
-					<button class="adjust-btn" on:click={() => adjustBet(2)} disabled={gameState !== 'idle'}>2X</button>
 				</div>
 			</div>
 
@@ -302,76 +346,78 @@
 					>
 						{#each GAME_MODES as mode}
 							<option value={mode.bullets}>
-								{mode.bullets} Bullet{mode.bullets > 1 ? 's' : ''} - {mode.multiplier}x
+								{mode.bullets} Bullet{mode.bullets > 1 ? 's' : ''}
 							</option>
 						{/each}
 					</select>
 				</div>
 			</div>
 
-			<!-- Action Buttons -->
-			{#if gameState === 'idle'}
-				<button
-					class="action-btn primary"
-					on:click={handlePlaceBet}
-					disabled={!canBet}
-				>
-					Place Bet
-				</button>
-			{:else if gameState === 'betting' || gameState === 'continue'}
-				{#if gameState === 'continue'}
-					<button
-						class="action-btn cashout"
-						on:click={handleCashOut}
-					>
-						Cash Out {currencySymbol}{currentPot.toFixed(2)}
-					</button>
-				{/if}
-				<button
-					class="action-btn {gameState === 'continue' ? 'secondary' : 'primary'}"
-					class:spinning
-					on:click={handleSpin}
-					disabled={spinning}
-				>
-					{#if spinning}
-						Spinning...
-					{:else}
-						{gameState === 'continue' ? `Continue ${currencySymbol}${(currentPot * (currentMode?.multiplier || 2)).toFixed(2)}` : 'Start'}
-					{/if}
-				</button>
-			{:else if gameState === 'result' && showingResult}
-				{#if survived}
-					<button
-						class="action-btn cashout"
-						on:click={handleCashOut}
-					>
-						Cash Out {currencySymbol}{currentPot.toFixed(2)}
-					</button>
-					<button
-						class="action-btn secondary"
-						on:click={handleContinue}
-					>
-						Continue {currencySymbol}{(currentPot * (currentMode?.multiplier || 2)).toFixed(2)}
-					</button>
-				{/if}
-			{/if}
-
-			<!-- Info Section -->
+			<!-- Payout Info -->
 			{#if currentMode}
-				<div class="info-section">
-					<span class="info-label">Win Rate</span>
-					<div class="info-row">
-						<span class="info-item">
-							<span class="info-key">Multiplier:</span>
-							<span class="info-value">{currentMode.multiplier}x</span>
+				<div class="payout-section">
+					<span class="payout-label">Payout</span>
+					<div class="payout-row">
+						<span class="payout-item">
+							<span class="payout-key">Multiplier:</span>
+							<span class="payout-value">{currentMode.multiplier}x</span>
 						</span>
-						<span class="info-item">
-							<span class="info-key">Probability:</span>
-							<span class="info-value">{(currentMode.survivalRate * 100).toFixed(0)}%</span>
+						<span class="payout-item">
+							<span class="payout-key">Probability:</span>
+							<span class="payout-value">{(currentMode.survivalRate * 100).toFixed(0)}%</span>
 						</span>
 					</div>
 				</div>
 			{/if}
+
+			<!-- Action Buttons -->
+			<div class="action-buttons">
+				{#if gameState === 'idle'}
+					<button
+						class="action-btn primary"
+						on:click={handlePlaceBet}
+						disabled={!canBet}
+					>
+						Place Bet
+					</button>
+				{:else if gameState === 'betting' || gameState === 'continue'}
+					<!-- Cash Out button - always show in betting/continue state -->
+					<button
+						class="action-btn cashout"
+						on:click={handleCashOut}
+					>
+						Cash Out {currencySymbol}{currentPot.toFixed(2)}
+					</button>
+					<!-- Start/Continue button -->
+					<button
+						class="action-btn secondary"
+						class:spinning
+						on:click={handleSpin}
+						disabled={spinning}
+					>
+						{#if spinning}
+							Spinning...
+						{:else}
+							{gameState === 'continue' ? `Continue ${currencySymbol}${(currentPot * (currentMode?.multiplier || 2)).toFixed(2)}` : 'Start'}
+						{/if}
+					</button>
+				{:else if gameState === 'result' && showingResult}
+					{#if survived}
+						<button
+							class="action-btn cashout"
+							on:click={handleCashOut}
+						>
+							Cash Out {currencySymbol}{currentPot.toFixed(2)}
+						</button>
+						<button
+							class="action-btn secondary"
+							on:click={handleContinue}
+						>
+							Continue {currencySymbol}{(currentPot * (currentMode?.multiplier || 2)).toFixed(2)}
+						</button>
+					{/if}
+				{/if}
+			</div>
 		</div>
 	{:else}
 		<!-- Auto Bet Tab -->
@@ -408,20 +454,20 @@
 					<span>Bet Amount</span>
 					<span class="balance-value">{currencySymbol}{$balance.toFixed(2)}</span>
 				</div>
-				<div class="bet-input-row">
-					<div class="input-field">
-						<input
-							type="number"
-							bind:value={betInput}
-							on:change={handleBetInput}
-							min={minBet}
-							max={maxBet}
-							step="0.01"
-							disabled={gameState !== 'idle' || isAutoBetting}
-						/>
+				<div class="bet-input-group">
+					<input
+						type="number"
+						bind:value={betInput}
+						on:change={handleBetInput}
+						min={minBet}
+						max={maxBet}
+						step="0.01"
+						disabled={gameState !== 'idle' || isAutoBetting}
+					/>
+					<div class="adjust-buttons">
+						<button class="adjust-btn" on:click={() => adjustBet(0.5)} disabled={gameState !== 'idle' || isAutoBetting}>1/2</button>
+						<button class="adjust-btn" on:click={() => adjustBet(2)} disabled={gameState !== 'idle' || isAutoBetting}>2X</button>
 					</div>
-					<button class="adjust-btn" on:click={() => adjustBet(0.5)} disabled={gameState !== 'idle' || isAutoBetting}>1/2</button>
-					<button class="adjust-btn" on:click={() => adjustBet(2)} disabled={gameState !== 'idle' || isAutoBetting}>2X</button>
 				</div>
 			</div>
 
@@ -438,7 +484,7 @@
 					>
 						{#each GAME_MODES as mode}
 							<option value={mode.bullets}>
-								{mode.bullets} Bullet{mode.bullets > 1 ? 's' : ''} - {mode.multiplier}x
+								{mode.bullets} Bullet{mode.bullets > 1 ? 's' : ''}
 							</option>
 						{/each}
 					</select>
@@ -495,35 +541,139 @@
 				</div>
 			</div>
 
-			<!-- Auto Bet Button -->
-			<button
-				class="action-btn {isAutoBetting ? 'danger' : 'primary'}"
-				on:click={runAutoBet}
-				disabled={!isAutoBetting && (gameState !== 'idle' || $balance < currentBet)}
-			>
-				{#if isAutoBetting}
-					Stop Auto Bet
-				{:else}
-					Start Auto Bet
-				{/if}
-			</button>
+			<!-- Advanced Toggle -->
+			<div class="advanced-toggle">
+				<span class="advanced-label">Advanced</span>
+				<button
+					class="toggle-switch"
+					class:active={showAdvanced}
+					on:click={() => { showAdvanced = !showAdvanced; SFX.play('click'); }}
+					disabled={isAutoBetting}
+					aria-label="Toggle advanced settings"
+				>
+					<span class="toggle-knob"></span>
+				</button>
+			</div>
 
-			<!-- Info Section -->
-			{#if currentMode && !isAutoBetting}
-				<div class="info-section">
-					<span class="info-label">Win Rate</span>
-					<div class="info-row">
-						<span class="info-item">
-							<span class="info-key">Multiplier:</span>
-							<span class="info-value">{currentMode.multiplier}x</span>
-						</span>
-						<span class="info-item">
-							<span class="info-key">Probability:</span>
-							<span class="info-value">{(currentMode.survivalRate * 100).toFixed(0)}%</span>
-						</span>
+			<!-- Advanced Settings Panel -->
+			{#if showAdvanced}
+				<div class="advanced-panel">
+					<!-- On Win -->
+					<div class="form-section">
+						<span class="form-label">On Win</span>
+						<div class="toggle-input-group">
+							<button
+								class="mode-btn"
+								class:active={onWinMode === 'reset'}
+								on:click={() => { onWinMode = 'reset'; SFX.play('click'); }}
+								disabled={isAutoBetting}
+							>
+								Reset
+							</button>
+							<button
+								class="mode-btn"
+								class:active={onWinMode === 'increase'}
+								on:click={() => { onWinMode = 'increase'; SFX.play('click'); }}
+								disabled={isAutoBetting}
+							>
+								Increase:
+							</button>
+							<div class="percent-input">
+								<input
+									type="number"
+									bind:value={onWinIncrease}
+									min="0"
+									max="100"
+									disabled={isAutoBetting || onWinMode === 'reset'}
+								/>
+								<span class="percent-sign">%</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- On Loss -->
+					<div class="form-section">
+						<span class="form-label">On Loss</span>
+						<div class="toggle-input-group">
+							<button
+								class="mode-btn"
+								class:active={onLossMode === 'reset'}
+								on:click={() => { onLossMode = 'reset'; SFX.play('click'); }}
+								disabled={isAutoBetting}
+							>
+								Reset
+							</button>
+							<button
+								class="mode-btn"
+								class:active={onLossMode === 'increase'}
+								on:click={() => { onLossMode = 'increase'; SFX.play('click'); }}
+								disabled={isAutoBetting}
+							>
+								Increase:
+							</button>
+							<div class="percent-input">
+								<input
+									type="number"
+									bind:value={onLossIncrease}
+									min="0"
+									max="100"
+									disabled={isAutoBetting || onLossMode === 'reset'}
+								/>
+								<span class="percent-sign">%</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Stop on Profit -->
+					<div class="form-section">
+						<div class="form-label">
+							<span>Stop on Profit</span>
+							<span class="balance-value">{currencySymbol}{stopOnProfit.toFixed(2)}</span>
+						</div>
+						<div class="input-field">
+							<input
+								type="number"
+								bind:value={stopOnProfit}
+								min="0"
+								step="0.01"
+								disabled={isAutoBetting}
+							/>
+						</div>
+					</div>
+
+					<!-- Stop on Loss -->
+					<div class="form-section">
+						<div class="form-label">
+							<span>Stop on Loss</span>
+							<span class="balance-value">{currencySymbol}{stopOnLoss.toFixed(2)}</span>
+						</div>
+						<div class="input-field">
+							<input
+								type="number"
+								bind:value={stopOnLoss}
+								min="0"
+								step="0.01"
+								disabled={isAutoBetting}
+							/>
+						</div>
 					</div>
 				</div>
 			{/if}
+
+			<!-- Auto Bet Button -->
+			<div class="action-buttons">
+				<button
+					class="action-btn {isAutoBetting ? 'danger' : 'primary'}"
+					on:click={runAutoBet}
+					disabled={!isAutoBetting && (gameState !== 'idle' || $balance < currentBet)}
+				>
+					{#if isAutoBetting}
+						Stop Auto Bet
+					{:else}
+						Start Auto Bet
+					{/if}
+				</button>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -532,10 +682,10 @@
 	.control-panel {
 		display: flex;
 		flex-direction: column;
-		background: var(--color-panel);
-		border-radius: 16px;
-		min-width: 280px;
-		max-width: 340px;
+		background: var(--color-panel-game);
+		border-radius: 12px;
+		min-width: 320px;
+		max-width: 380px;
 		height: 100%;
 		overflow: hidden;
 	}
@@ -543,20 +693,30 @@
 	/* Tab Toggle */
 	.tab-toggle {
 		display: flex;
-		background: var(--color-bg-secondary);
-		padding: 8px;
+		justify-content: center;
+		background: var(--color-panel-game);
+		padding: 12px 16px;
+	}
+
+	.tab-container {
+		display: flex;
+		background: var(--color-panel-dark);
+		border-radius: 24px;
+		padding: 4px;
 		gap: 4px;
 	}
 
 	.tab-btn {
 		flex: 1;
-		padding: 10px 16px;
+		padding: 10px 20px;
 		background: transparent;
 		color: var(--color-text-muted);
 		font-size: 14px;
 		font-weight: 500;
-		border-radius: 8px;
+		border-radius: 20px;
+		border: none;
 		transition: all 0.2s ease;
+		text-align: center;
 	}
 
 	.tab-btn:hover:not(:disabled) {
@@ -564,7 +724,7 @@
 	}
 
 	.tab-btn.active {
-		background: var(--color-bg-tertiary);
+		background: var(--color-panel-active);
 		color: var(--color-text);
 	}
 
@@ -608,9 +768,55 @@
 	}
 
 	/* Input Fields */
-	.bet-input-row {
+	.bet-input-group {
 		display: flex;
-		gap: 8px;
+		align-items: stretch;
+		background: var(--color-input-wrapper);
+		border-radius: 8px;
+		overflow: hidden;
+	}
+
+	.bet-input-group input {
+		flex: 1;
+		padding: 12px;
+		background: var(--color-input);
+		border: none;
+		color: var(--color-text);
+		font-size: 14px;
+		outline: none;
+		min-width: 0;
+	}
+
+	.bet-input-group input[type="number"]::-webkit-inner-spin-button,
+	.bet-input-group input[type="number"]::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	.adjust-buttons {
+		display: flex;
+		align-items: stretch;
+		border-left: 1px solid var(--color-bg-tertiary);
+	}
+
+	.adjust-btn {
+		padding: 12px 16px;
+		background: transparent;
+		color: var(--color-text-muted);
+		font-size: 12px;
+		font-weight: 600;
+		border-radius: 0;
+		white-space: nowrap;
+		border-left: 1px solid var(--color-bg-tertiary);
+	}
+
+	.adjust-btn:first-child {
+		border-left: none;
+	}
+
+	.adjust-btn:hover:not(:disabled) {
+		background: var(--color-bg-tertiary);
+		color: var(--color-text);
 	}
 
 	.input-field {
@@ -659,21 +865,19 @@
 		margin: 0;
 	}
 
-	.adjust-btn {
-		padding: 12px 16px;
-		background: var(--color-bg-tertiary);
-		color: var(--color-text);
-		font-size: 12px;
-		font-weight: 600;
-		border-radius: 8px;
-		white-space: nowrap;
-	}
-
-	.adjust-btn:hover:not(:disabled) {
-		background: var(--color-accent);
-	}
-
 	/* Action Buttons */
+	.action-buttons {
+		margin-top: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	/* When payout section is present, it takes the margin-top auto */
+	.payout-section ~ .action-buttons {
+		margin-top: 16px;
+	}
+
 	.action-btn {
 		width: 100%;
 		padding: 14px;
@@ -695,13 +899,13 @@
 	}
 
 	.action-btn.secondary {
-		background: transparent;
-		color: var(--color-accent);
-		border: 1px solid var(--color-accent);
+		background: var(--color-bg-tertiary);
+		color: var(--color-text);
+		border: none;
 	}
 
 	.action-btn.secondary:hover:not(:disabled) {
-		background: rgba(0, 200, 83, 0.1);
+		background: var(--color-bg-secondary);
 	}
 
 	.action-btn.cashout {
@@ -810,39 +1014,161 @@
 		color: var(--color-danger);
 	}
 
-	/* Info Section */
-	.info-section {
-		margin-top: auto;
-		padding-top: 12px;
-		border-top: 1px solid var(--color-bg-tertiary);
+	/* Advanced Toggle */
+	.advanced-toggle {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px 0;
 	}
 
-	.info-label {
+	.advanced-label {
+		font-size: 12px;
+		color: var(--color-text-muted);
+	}
+
+	.toggle-switch {
+		position: relative;
+		width: 44px;
+		height: 24px;
+		background: var(--color-input);
+		border-radius: 12px;
+		padding: 2px;
+		cursor: pointer;
+		transition: background 0.2s ease;
+	}
+
+	.toggle-switch.active {
+		background: var(--color-accent);
+	}
+
+	.toggle-switch:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.toggle-knob {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		width: 20px;
+		height: 20px;
+		background: white;
+		border-radius: 50%;
+		transition: transform 0.2s ease;
+	}
+
+	.toggle-switch.active .toggle-knob {
+		transform: translateX(20px);
+	}
+
+	/* Advanced Panel */
+	.advanced-panel {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding-top: 8px;
+	}
+
+	.toggle-input-group {
+		display: flex;
+		align-items: stretch;
+		background: var(--color-input);
+		border-radius: 8px;
+		overflow: hidden;
+	}
+
+	.mode-btn {
+		padding: 10px 12px;
+		background: transparent;
+		color: var(--color-text-muted);
+		font-size: 12px;
+		font-weight: 500;
+		border: none;
+		border-radius: 0;
+		transition: all 0.2s ease;
+	}
+
+	.mode-btn.active {
+		background: var(--color-input-wrapper);
+		color: var(--color-text);
+	}
+
+	.mode-btn:hover:not(:disabled):not(.active) {
+		color: var(--color-text);
+	}
+
+	.percent-input {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		background: var(--color-input);
+		border-left: 1px solid var(--color-bg-tertiary);
+	}
+
+	.percent-input input {
+		flex: 1;
+		padding: 10px 8px;
+		background: transparent;
+		border: none;
+		color: var(--color-text);
+		font-size: 14px;
+		outline: none;
+		min-width: 0;
+		text-align: center;
+	}
+
+	.percent-input input:disabled {
+		opacity: 0.5;
+	}
+
+	.percent-input input[type="number"]::-webkit-inner-spin-button,
+	.percent-input input[type="number"]::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	.percent-sign {
+		padding-right: 12px;
+		color: var(--color-text-muted);
+		font-size: 14px;
+	}
+
+	/* Payout Section */
+	.payout-section {
+		margin-top: auto;
+	}
+
+	.payout-label {
 		display: block;
 		font-size: 12px;
 		color: var(--color-text-muted);
 		margin-bottom: 8px;
 	}
 
-	.info-row {
+	.payout-row {
 		display: flex;
 		justify-content: space-between;
-		background: var(--color-input);
+		align-items: center;
+		background: var(--color-input-wrapper);
 		border-radius: 8px;
-		padding: 10px 12px;
+		padding: 14px 16px;
+		gap: 16px;
 	}
 
-	.info-item {
+	.payout-item {
 		display: flex;
-		gap: 6px;
-		font-size: 12px;
+		align-items: center;
+		gap: 8px;
+		font-size: 14px;
+		white-space: nowrap;
 	}
 
-	.info-key {
-		color: var(--color-text-muted);
+	.payout-key {
+		color: var(--color-text);
 	}
 
-	.info-value {
+	.payout-value {
 		color: var(--color-text);
 		font-weight: 600;
 	}
@@ -894,14 +1220,6 @@
 	.compact .action-btn {
 		padding: 10px;
 		font-size: 12px;
-	}
-
-	.compact .info-row {
-		padding: 8px;
-	}
-
-	.compact .info-item {
-		font-size: 10px;
 	}
 
 	.compact .auto-progress {
