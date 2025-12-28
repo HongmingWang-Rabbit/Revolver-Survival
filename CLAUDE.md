@@ -62,13 +62,23 @@ Auto bet allows players to automate multiple rounds with configurable settings:
 ### Configuration Files
 
 - `frontend/src/lib/config/game.ts` - Demo settings, timing values, bet limits, sound mappings
-- `frontend/src/lib/config/spine.ts` - Spine animation mappings, scale, canvas dimensions, positioning
+- `frontend/src/lib/config/spine.ts` - Spine animation mappings, scale, canvas dimensions, positioning, rendering settings
 - `frontend/src/app.css` - CSS custom properties (colors, fonts) - theme configuration
 - `math/games/revolver_survival/config.py` - House edge, chamber count, multiplier formulas
 
 ### Key Integrations
 
 **Spine Animations**: Character states map to animation names (A1=idle, A2=betting, B1-B3=spinning, etc.). The character is dynamically sized based on container dimensions. Update `spine.ts` when changing Spine files or adjusting character size/position.
+
+**Spine Rendering** (`src/lib/config/spine.ts`): High-DPI rendering settings for crisp character display:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `rendering.minPixelRatio` | Minimum resolution multiplier | 2 |
+| `rendering.antialias` | Enable anti-aliasing | true |
+| `rendering.roundPixels` | Round positions for sharpness | true |
+
+The renderer automatically updates resolution when browser zoom changes to maintain crisp rendering at any zoom level.
 
 **Sound Effects** (`src/lib/utils/sounds.ts`): Web Audio API-based sound manager. Sound files are in `static/sounds/`. Configuration in `game.ts` under `sounds` section maps sound names to files:
 

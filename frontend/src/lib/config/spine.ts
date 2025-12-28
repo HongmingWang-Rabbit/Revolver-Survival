@@ -34,6 +34,15 @@ export interface SpineConfig {
 		/** Vertical offset from center (0 = centered, positive = lower) */
 		verticalOffset: number;
 	};
+	/** Rendering settings for PixiJS canvas */
+	rendering: {
+		/** Minimum pixel ratio for high-DPI rendering (default: 2) */
+		minPixelRatio: number;
+		/** Enable anti-aliasing for smoother edges */
+		antialias: boolean;
+		/** Round pixel positions for sharper rendering */
+		roundPixels: boolean;
+	};
 	/** Animation name mappings for game states */
 	animations: {
 		/** Default idle animation */
@@ -65,6 +74,11 @@ export const spineConfig: SpineConfig = {
 	position: {
 		// Character anchor is at feet, so offset down from center
 		verticalOffset: 0.25,
+	},
+	rendering: {
+		minPixelRatio: 2,
+		antialias: true,
+		roundPixels: true,
 	},
 	animations: {
 		idle: 'A1',
