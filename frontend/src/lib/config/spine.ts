@@ -63,8 +63,8 @@ export interface SpineConfig {
 }
 
 export const spineConfig: SpineConfig = {
-	atlasPath: 'spine/demo.atlas',
-	skeletonPath: 'spine/demo.json',
+	atlasPath: 'https://raw.githubusercontent.com/HongmingWang-Rabbit/Revolver-Survival/main/frontend/static/spine/demo.atlas',
+	skeletonPath: 'https://raw.githubusercontent.com/HongmingWang-Rabbit/Revolver-Survival/main/frontend/static/spine/demo.json',
 	defaultMixDuration: 0.3,
 	scale: 0.55,
 	canvas: {

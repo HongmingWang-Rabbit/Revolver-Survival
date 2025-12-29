@@ -4,10 +4,6 @@
 	import { Application, Assets } from 'pixi.js';
 	import { Spine } from '@esotericsoftware/spine-pixi-v8';
 	import { spineConfig, getSpinningAnimation, getWinAnimation } from '$lib/config/spine';
-	import { base } from '$app/paths';
-
-	// Use SvelteKit's base path for asset resolution (works in both dev and production)
-	const baseUrl = base || '';
 
 	let container: HTMLDivElement;
 	let app: Application | null = null;
@@ -19,8 +15,6 @@
 
 	// Extract config values
 	const {
-		atlasPath,
-		skeletonPath,
 		animations,
 		nonLoopingAnimations,
 		canvas,
@@ -156,13 +150,9 @@
 
 			container.appendChild(app.canvas);
 
-			// Construct URLs for assets using SvelteKit base path
-			const atlasUrl = `${baseUrl}${atlasPath}`;
-			const skeletonUrl = `${baseUrl}${skeletonPath}`;
-
 			await Assets.load([
-				{ alias: 'spineAtlas', src: atlasUrl },
-				{ alias: 'spineData', src: skeletonUrl },
+				{ alias: 'spineAtlas', src: spineConfig.atlasPath },
+				{ alias: 'spineData', src: spineConfig.skeletonPath },
 			]);
 
 			spine = Spine.from({

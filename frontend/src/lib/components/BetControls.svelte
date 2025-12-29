@@ -1112,11 +1112,15 @@
 	}
 
 	/* Payout Section */
+	.payout-section {
+		margin-top: 4px;
+	}
+
 	.payout-label {
 		display: block;
-		font-size: 12px;
+		font-size: 10px;
 		color: var(--color-text-muted);
-		margin-bottom: 8px;
+		margin-bottom: 4px;
 	}
 
 	.payout-row {
@@ -1124,26 +1128,26 @@
 		justify-content: space-between;
 		align-items: center;
 		background: var(--color-input-wrapper);
-		border-radius: 8px;
-		padding: 14px 16px;
-		gap: 16px;
+		border-radius: 6px;
+		padding: 8px 10px;
+		gap: 8px;
 	}
 
 	.payout-item {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		font-size: 14px;
+		gap: 3px;
+		font-size: 10px;
 		white-space: nowrap;
 	}
 
 	.payout-key {
-		color: var(--color-text);
+		color: var(--color-text-muted);
 	}
 
 	.payout-value {
 		color: var(--color-text);
-		font-weight: 600;
+		font-weight: 500;
 	}
 
 	/* Responsive */
