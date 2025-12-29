@@ -55,7 +55,7 @@ Game state flow: `idle` → `betting` → `spinning` → `result` → (`continue
 
 Auto bet allows players to automate multiple rounds with configurable settings:
 - `autoBetConfig` store tracks running state, progress, wins/losses, and profit
-- Basic settings: Number of bets, Stop after X wins, Continue shots before cash out
+- Basic settings: Number of bets, Continue shots before cash out
 - Configuration in `gameConfig.autoBet` (default bets, max bets, max continue shots)
 - Timing in `gameConfig.timing` (autoBetSpinDelay, autoBetRoundDelay)
 
@@ -64,6 +64,12 @@ Auto bet allows players to automate multiple rounds with configurable settings:
 - On Loss: Reset bet to initial OR increase by X% (Martingale)
 - Stop on Profit: Auto-stop when profit threshold reached
 - Stop on Loss: Auto-stop when loss threshold reached
+
+### UI Behavior
+
+- **Place Bet auto-starts**: Clicking "Place Bet" automatically places the bet and starts spinning
+- **Continue auto-spins**: Clicking "Continue" automatically continues and starts the next spin
+- **Spacebar shortcut**: Press spacebar to place bet (auto-starts) or continue during gameplay
 
 ### Configuration Files
 

@@ -6,8 +6,6 @@
 export { default as BetControls } from './components/BetControls.svelte';
 export { default as GameActions } from './components/GameActions.svelte';
 export { default as GameDisclaimer } from './components/GameDisclaimer.svelte';
-export { default as Header } from './components/Header.svelte';
-export { default as StickMan } from './components/StickMan.svelte';
 export { default as SpineCharacter } from './components/SpineCharacter.svelte';
 
 // Config

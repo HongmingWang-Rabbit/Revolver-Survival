@@ -34,7 +34,6 @@
 
 	// Auto bet settings
 	let autoBetCount = gameConfig.autoBet.defaultBets;
-	let autoStopOnWin = 0;
 	let autoContinueShots = 0;
 
 	// Advanced settings
@@ -121,10 +120,12 @@
 		SFX.play('click');
 	}
 
-	function handlePlaceBet() {
+	async function handlePlaceBet() {
 		if (canBet) {
 			placeBet();
 			SFX.play('bet');
+			// Automatically start the round after placing bet
+			await handleSpin();
 		}
 	}
 
@@ -134,9 +135,11 @@
 		await spin();
 	}
 
-	function handleContinue() {
+	async function handleContinue() {
 		SFX.play('click');
 		continueBetting();
+		// Also trigger spin immediately after continuing
+		await handleSpin();
 	}
 
 	async function handleCashOut() {
@@ -160,7 +163,7 @@
 		// Start auto bet
 		startAutoBet({
 			totalBets: autoBetCount,
-			stopOnWins: autoStopOnWin,
+			stopOnWins: 0,
 			continueShots: autoContinueShots,
 		});
 
@@ -294,7 +297,7 @@
 				on:click={() => { activeTab = 'manual'; SFX.play('click'); }}
 				disabled={isAutoBetting}
 			>
-				手动投入
+				Manual
 			</button>
 			<button
 				class="tab-btn"
@@ -302,7 +305,7 @@
 				on:click={() => { activeTab = 'auto'; SFX.play('click'); }}
 				disabled={isAutoBetting}
 			>
-				自动投入
+				Auto
 			</button>
 		</div>
 	</div>
@@ -353,6 +356,50 @@
 				</div>
 			</div>
 
+			<!-- Action Buttons -->
+			<div class="action-buttons">
+				<!-- Place Bet / Cash Out button -->
+				{#if gameState !== 'idle' && currentPot > 0}
+					<button
+						class="action-btn primary"
+						on:click={handleCashOut}
+						disabled={spinning}
+					>
+						Cash Out {currencySymbol}{currentPot.toFixed(2)}
+					</button>
+				{:else}
+					<button
+						class="action-btn primary"
+						on:click={handlePlaceBet}
+						disabled={gameState !== 'idle' || !canBet}
+					>
+						Place Bet
+					</button>
+				{/if}
+
+				<!-- Start button -->
+				<button
+					class="action-btn secondary"
+					class:spinning
+					on:click={() => {
+						if (gameState === 'betting' || gameState === 'continue') {
+							handleSpin();
+						} else if (gameState === 'result' && showingResult && survived) {
+							handleContinue();
+						}
+					}}
+					disabled={gameState === 'idle' || spinning || (gameState === 'result' && !survived)}
+				>
+					{#if spinning}
+						Spinning...
+					{:else if gameState === 'result' && survived}
+						Continue {currencySymbol}{(currentPot * (currentMode?.multiplier || 2)).toFixed(2)}
+					{:else}
+						Start
+					{/if}
+				</button>
+			</div>
+
 			<!-- Payout Info -->
 			{#if currentMode}
 				<div class="payout-section">
@@ -369,55 +416,6 @@
 					</div>
 				</div>
 			{/if}
-
-			<!-- Action Buttons -->
-			<div class="action-buttons">
-				{#if gameState === 'idle'}
-					<button
-						class="action-btn primary"
-						on:click={handlePlaceBet}
-						disabled={!canBet}
-					>
-						Place Bet
-					</button>
-				{:else if gameState === 'betting' || gameState === 'continue'}
-					<!-- Cash Out button - always show in betting/continue state -->
-					<button
-						class="action-btn cashout"
-						on:click={handleCashOut}
-					>
-						Cash Out {currencySymbol}{currentPot.toFixed(2)}
-					</button>
-					<!-- Start/Continue button -->
-					<button
-						class="action-btn secondary"
-						class:spinning
-						on:click={handleSpin}
-						disabled={spinning}
-					>
-						{#if spinning}
-							Spinning...
-						{:else}
-							{gameState === 'continue' ? `Continue ${currencySymbol}${(currentPot * (currentMode?.multiplier || 2)).toFixed(2)}` : 'Start'}
-						{/if}
-					</button>
-				{:else if gameState === 'result' && showingResult}
-					{#if survived}
-						<button
-							class="action-btn cashout"
-							on:click={handleCashOut}
-						>
-							Cash Out {currencySymbol}{currentPot.toFixed(2)}
-						</button>
-						<button
-							class="action-btn secondary"
-							on:click={handleContinue}
-						>
-							Continue {currencySymbol}{(currentPot * (currentMode?.multiplier || 2)).toFixed(2)}
-						</button>
-					{/if}
-				{/if}
-			</div>
 		</div>
 	{:else}
 		<!-- Auto Bet Tab -->
@@ -502,23 +500,6 @@
 						bind:value={autoBetCount}
 						min="1"
 						max={gameConfig.autoBet.maxBets}
-						disabled={isAutoBetting}
-					/>
-				</div>
-			</div>
-
-			<!-- Stop on Wins -->
-			<div class="form-section">
-				<div class="form-label">
-					<span>Stop after Wins</span>
-					<span class="form-hint">0 = disabled</span>
-				</div>
-				<div class="input-field">
-					<input
-						type="number"
-						bind:value={autoStopOnWin}
-						min="0"
-						max={autoBetCount}
 						disabled={isAutoBetting}
 					/>
 				</div>
@@ -700,6 +681,7 @@
 
 	.tab-container {
 		display: flex;
+		width: 100%;
 		background: var(--color-panel-dark);
 		border-radius: 24px;
 		padding: 4px;
@@ -740,6 +722,12 @@
 		padding: 16px;
 		flex: 1;
 		overflow-y: auto;
+		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none; /* IE/Edge */
+	}
+
+	.panel-content::-webkit-scrollbar {
+		display: none; /* Chrome/Safari */
 	}
 
 	/* Form Sections */
@@ -867,15 +855,9 @@
 
 	/* Action Buttons */
 	.action-buttons {
-		margin-top: auto;
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-	}
-
-	/* When payout section is present, it takes the margin-top auto */
-	.payout-section ~ .action-buttons {
-		margin-top: 16px;
 	}
 
 	.action-btn {
@@ -899,19 +881,13 @@
 	}
 
 	.action-btn.secondary {
-		background: var(--color-bg-tertiary);
-		color: var(--color-text);
+		background: var(--color-panel-dark);
+		color: var(--color-gold);
 		border: none;
 	}
 
 	.action-btn.secondary:hover:not(:disabled) {
-		background: var(--color-bg-secondary);
-	}
-
-	.action-btn.cashout {
-		background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
-		color: white;
-		box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+		background: var(--color-bg-tertiary);
 	}
 
 	.action-btn.danger {
@@ -932,7 +908,8 @@
 	}
 
 	.action-btn.spinning {
-		background: var(--color-bg-tertiary);
+		background: var(--color-panel-dark);
+		color: var(--color-gold);
 		box-shadow: none;
 	}
 
@@ -1135,10 +1112,6 @@
 	}
 
 	/* Payout Section */
-	.payout-section {
-		margin-top: auto;
-	}
-
 	.payout-label {
 		display: block;
 		font-size: 12px;

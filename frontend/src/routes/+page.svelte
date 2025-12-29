@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Header, BetControls, SpineCharacter, GameDisclaimer } from '$lib';
+	import { BetControls, SpineCharacter, GameDisclaimer } from '$lib';
 	import { roundState, GAME_MODES, placeBet, spin, canPlaceBet, canSpin, isSpinning } from '$lib/stores/gameStore';
 	import { SFX } from '$lib/utils/sounds';
 
@@ -7,17 +7,22 @@
 	$: gameState = $roundState.gameState;
 	$: currentPot = $roundState.currentPot;
 
-	// Space bar keyboard binding
-	function handleKeydown(event: KeyboardEvent) {
+	// Space bar keyboard binding - matches button behavior (place bet auto-starts)
+	async function handleKeydown(event: KeyboardEvent) {
 		if (event.code === 'Space' && !event.repeat) {
 			event.preventDefault();
 
 			if ($roundState.gameState === 'idle' && $canPlaceBet) {
 				placeBet();
 				SFX.play('bet');
+				// Auto-start after placing bet (matches button behavior)
+				if ($canSpin) {
+					SFX.play('spin');
+					await spin();
+				}
 			} else if (($roundState.gameState === 'betting' || $roundState.gameState === 'continue') && $canSpin && !$isSpinning) {
 				SFX.play('spin');
-				spin();
+				await spin();
 			}
 		}
 	}
@@ -31,8 +36,6 @@
 </svelte:head>
 
 <div class="game-container">
-	<Header />
-
 	<main class="game-main">
 		<div class="game-layout">
 			<!-- Left Panel: Bet Controls -->

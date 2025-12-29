@@ -212,17 +212,7 @@
 	});
 </script>
 
-<div class="spine-container" bind:this={container}>
-	<div class="status-msg">
-		{#if showingResult && !survived}
-			<span class="dead">GAME OVER</span>
-		{:else if showingResult && survived}
-			<span class="alive">SURVIVED!</span>
-		{:else if spinning}
-			<span class="aiming">Aiming...</span>
-		{/if}
-	</div>
-</div>
+<div class="spine-container" bind:this={container}></div>
 
 <style>
 	.spine-container {
@@ -241,36 +231,5 @@
 		display: block;
 		width: 100%;
 		height: 100%;
-	}
-
-	.status-msg {
-		position: absolute;
-		bottom: 10px;
-		left: 50%;
-		transform: translateX(-50%);
-		font-size: clamp(0.75rem, 2vw, 1rem);
-		font-weight: bold;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		white-space: nowrap;
-		z-index: 10;
-	}
-
-	.status-msg .dead {
-		color: var(--color-danger);
-		text-shadow: 0 0 20px var(--color-danger);
-	}
-	.status-msg .alive {
-		color: var(--color-success);
-		text-shadow: 0 0 20px var(--color-success);
-	}
-	.status-msg .aiming {
-		color: var(--color-warning);
-		animation: blink 0.3s infinite;
-	}
-
-	@keyframes blink {
-		0%, 100% { opacity: 1; }
-		50% { opacity: 0.5; }
 	}
 </style>
