@@ -63,8 +63,8 @@ export interface SpineConfig {
 }
 
 export const spineConfig: SpineConfig = {
-	atlasPath: '/spine/demo.atlas',
-	skeletonPath: '/spine/demo.json',
+	atlasPath: 'spine/demo.atlas',
+	skeletonPath: 'spine/demo.json',
 	defaultMixDuration: 0.3,
 	scale: 0.55,
 	canvas: {
